@@ -1,0 +1,10 @@
+{
+  "name": "treetool",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^3.0.0",
+    "fs-extra": "^8.1.0"
+  }
+}
