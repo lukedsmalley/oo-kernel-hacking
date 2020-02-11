@@ -1,4 +1,5 @@
-#!/bin/bash -eo pipefail
+#!/bin/bash -e
+set -o pipefail
 
 # From https://stackoverflow.com/a/4774063
 WORKSPACE_PATH="$( cd "$(dirname "$0")" > /dev/null 2>&1; pwd -P )"
