@@ -38,4 +38,12 @@ This project seeks primarily to harness object-orientation and reflective protoc
 [6] D. Beuche, A. Guerrouat, H. Papajewski, W. Schröder-Preikschat, O. Spinczyk, and U. Spinczyk. The PURE Family of Object-Oriented Operating Systems for Deeply Embedded Systems. In Proc. 2nd IEEE International Symposium on Object-Oriented Real-Time Distributed Computing (ISORC ’99), St. Malo, France, May 1999.
 
 ## Section Header Text
-This kernel workspace is based on [this Gist](https://gist.github.com/chrisdone/02e165a0004be33734ac2334f215380e) by [Chris Done](https://gist.github.com/chrisdone), since I have not done much like this before. I'll work further into the proper way to do kernel work as I get better aquainted with the kernel source.
+This kernel workspace is based on [this Gist](https://gist.github.com/chrisdone/02e165a0004be33734ac2334f215380e) by [Chris Done](https://gist.github.com/chrisdone), since I have not done much like this before. I'll work further into the proper way to do kernel work as I get better aquainted with the kernel source. It walks through the kernel build, BusyBox build (really small version of manny standard commands and /bin/sh), initial RAM-disk creation, and then launches all of it with the QEMU emulator.
+
+I also read [The Linux Bootdisk HOWTO](http://www.tldp.org/HOWTO/Bootdisk-HOWTO/) while trying to understand how to make the kernel bootable (Didn't get all the way through).
+
+Used [ILDASM](https://docs.microsoft.com/en-us/dotnet/framework/tools/ildasm-exe-il-disassembler) in high school to disassemble .NET binaries into their intermediate language. JetBrains probably has many more tools now for .NET than they had then. Pages [on the Common Intermediate Language](https://en.wikipedia.org/wiki/Common_Intermediate_Language) and [the list of its intructions](https://en.wikipedia.org/wiki/List_of_CIL_instructions).
+
+I'm not certain inspiration should also be drawn from the JVM, but there is also [a description of Java bytecode](https://en.wikipedia.org/wiki/Java_bytecode), [a list of instructions](https://en.wikipedia.org/wiki/Java_bytecode_instruction_listings), and [a description of the class file format](https://en.wikipedia.org/wiki/Java_class_file).
+
+We will be interpreting, not worrying about optimization or just-in-time compilation.
