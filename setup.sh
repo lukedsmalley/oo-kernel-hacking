@@ -1,47 +1,53 @@
 #!/bin/bash -e
 set -o pipefail
 
+# Silent pushd
+qpushd () {
+  pushd "$1" &> /dev/null
+}
+
+# Silent popd
+qpopd () {
+  popd &> /dev/null
+}
+
 # From https://stackoverflow.com/a/4774063
 WORKSPACE_PATH="$( cd "$(dirname "$0")" > /dev/null 2>&1; pwd -P )"
 if [[ $WORKSPACE_PATH = '' ]]; then
   exit 1
 fi
 
-pushd "$WORKSPACE_PATH" &> /dev/null
+# Indentation has been applied relative to working directory depth
 
-if [[ -d build ]]; then
-  echo 'The "build" directory already exists, so everything should already be configured.'
-  echo 'Delete the directory to clone everything again and start over.'
-  echo
-  popd &> /dev/null # $WORKSPACE_PATH
-  exit 1
-fi
+qpushd "$WORKSPACE_PATH"
 
-mkdir -p tree-snapshots super-src build/linux build/busybox
-./treetool snapshot build/linux tree-snapshots/linux-unconfigured.tree
-./treetool snapshot build/busybox tree-snapshots/busybox-unconfigured.tree
+  if [[ -d build ]] || [[ -d tree-snapshots ]]; then
+    echo 'The "build" ad/or "tree-snapshots" directories already exist, so'
+    echo 'everything should already be configured. Delete them to'
+    echo 'reconfigure everything again and start over.'
+    echo
+    qpopd "$WORKSPACE_PATH"
+    exit 1
+  fi
 
-pushd super-src &> /dev/null
+  mkdir -p tree-snapshots build/linux build/busybox
+  ./treetool snapshot build/linux tree-snapshots/linux-unconfigured.tree
+  ./treetool snapshot build/busybox tree-snapshots/busybox-unconfigured.tree
 
-git clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git linux
-pushd linux &> /dev/null
-git checkout v5.5.2
-make O=../../build/linux allnoconfig
-../../treetool snapshot ../../build/linux ../../tree-snapshots/linux-allnoconfig.tree
-popd &> /dev/null # linux
+  qpushd src
 
-git clone git://busybox.net/busybox.git busybox
-pushd busybox &> /dev/null
-git checkout 1_31_stable
-make O=../../build/busybox defconfig
-../../treetool snapshot ../../build/busybox ../../tree-snapshots/busybox-defconfig.tree
-popd &> /dev/null # busybox
+    qpushd linux
+      make O=../../build/linux allnoconfig
+      cp .config-projectdefault ../../build/linux/.config
+      ../../treetool snapshot ../../build/linux ../../tree-snapshots/linux-configured.tree
+    qpopd linux
 
-popd &> /dev/null # super-src
+    qpushd busybox &> /dev/null
+      make O=../../build/busybox defconfig
+      cp .config-projectdefault ../../build/busybox/.config
+      ../../treetool snapshot ../../build/busybox ../../tree-snapshots/busybox-configured.tree
+    qpopd busybox
 
-#sed -i 's///' /build/linux/.config
-#sed -i 's///' /build/busybox/.config
-#./treetool snapshot build/linux tree-snapshots/linux-configured.tree
-#./treetool snapshot build/busybox tree-snapshots/busybox-configured.tree
+  qpopd src
 
-popd &> /dev/null # $WORKSPACE_PATH
+qpopd "$WORKSPACE_PATH"
