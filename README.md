@@ -55,6 +55,8 @@ I also read [The Linux Bootdisk HOWTO](http://www.tldp.org/HOWTO/Bootdisk-HOWTO/
 
 Used [ILDASM](https://docs.microsoft.com/en-us/dotnet/framework/tools/ildasm-exe-il-disassembler) in high school to disassemble .NET binaries into their intermediate language. JetBrains probably has many more tools now for .NET than they had then. Pages [on the Common Intermediate Language](https://en.wikipedia.org/wiki/Common_Intermediate_Language) and [the list of its intructions](https://en.wikipedia.org/wiki/List_of_CIL_instructions).
 
+We need to investigate how well-developed [.NET Core](https://docs.microsoft.com/en-us/dotnet/core/) is now for Linux, as an alternative to the [Mono framework](https://www.mono-project.com/). This will be needed once our kernel source includes C# code.
+
 I'm not certain inspiration should also be drawn from the JVM, but there is also [a description of Java bytecode](https://en.wikipedia.org/wiki/Java_bytecode), [a list of instructions](https://en.wikipedia.org/wiki/Java_bytecode_instruction_listings), and [a description of the class file format](https://en.wikipedia.org/wiki/Java_class_file).
 
 We will be interpreting, not worrying about optimization or just-in-time compilation.
