@@ -33,9 +33,9 @@ We may need to create a quick and dirty translator to turn .NET intermediate lan
 ## Workspace Details
 This repository contains the Linux kernel 5.5.2 and Busybox 1.31 source trees that are used to build a minimal bootable Linux system as described by the practical references below.
 
-After cloning this repository, run `setup.sh` to do `make suchandsuchconfig` and whatever else under the covers, creating the `build` and `tree-snapshots` directories. `tree-snapshots` contains listings of the subdirectories of `build`, which can be compared with `treetool` if you want to see what configuration and building actually do.
+After cloning this repository, run `setup.sh` to do `make suchandsuchconfig` and whatever else happens under the covers, creating the `build` and `tree-snapshots` directories. `tree-snapshots` contains listings of the subdirectories of `build`, which can be compared with `treetool` if you want to see what configuration and building actually do.
 
-Run `build.sh` to build the kernel, busybox, and initial RAM-disk (initramfs/initrd) in `build`.
+Run `build.sh` to build the kernel, busybox, and initial RAM-disk (initramfs/initrd) in `build`. If you pass arguments to this script, they get passed to `make`. Use `-jN` to do N parts of the build concurrently, where N <= your CPU thread count.
 
 Run `start-qemu` to launch the kernel and initramfs in the QEMU emulator.
 
