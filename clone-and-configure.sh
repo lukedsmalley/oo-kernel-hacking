@@ -11,6 +11,7 @@ pushd "$WORKSPACE_PATH" &> /dev/null
 
 if [[ -d build ]]; then
   echo 'The "build" directory already exists, so everything should already be cloned.'
+  echo 'Delete the directory to clone everything again and start over.'
   echo
   popd &> /dev/null # $WORKSPACE_PATH
   exit 1
