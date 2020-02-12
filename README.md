@@ -9,13 +9,24 @@
 Completing the runtime is the project expectation, rebuilding the rest of the kernel interface is an optimistic target.
 
 ## Goals
-The overarching goal is to create a whole new runtime and embed it at (nearly) the bottom of the operating system, rather than simply grafting the .NET Core runtime into the kernel sources or something like that. We should:
-* Locate where to insert the runtime into the Linux kernel. This is likely to be at least after all memory-related setup in the boot process.
-* Build a reference-counting heap over the memory management part of the kernel to hold class instances.
-* Build the bytecode program loader. First priority is copying into memory. If we have more time we can have it validate programs.
-* Build the bytecode interpreter for running loaded programs.
-* Create the a minimum viable kernel API to expose to bytecode programs.
-* (Optionally) Create a quick and dirty translator to turn .NET intermediate language into our bytecode. This could be more fun than handwriting bytecode programs.
+The overarching goal is to create a whole new runtime and embed it at (nearly) the bottom of the operating system, rather than simply grafting the .NET Core runtime into the kernel sources or something like that.
+
+First steps:
+* (C) Locate where to insert the runtime into the Linux kernel. This is likely to be, in terms of the boot process, at least after:
+  * Memory-related setup
+  * Initial RAM-disk has been loaded
+* (C) Build a reference-counting heap over the memory management part of the kernel to hold class instances.
+
+The fun things:
+* (C) Build the bytecode program loader. First priority is copying into memory. If we have more time we can have it validate programs.
+* (C) Build the bytecode interpreter for running loaded programs.
+
+The optimistic things:
+* (C#) Implement as much of the rest of the kernel in C# as possible
+* (C/C#) Make hooks into the native code in the C# portion of the kernel as necessary
+* (C#) Create the a minimum viable kernel API to expose to bytecode programs
+
+We may need to create a quick and dirty translator to turn .NET intermediate language into our bytecode. This could be more fun than handwriting bytecode programs.
 
 ## Formal Research Proposal
 <div align="center">
