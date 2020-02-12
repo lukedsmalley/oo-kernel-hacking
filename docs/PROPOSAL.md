@@ -1,5 +1,5 @@
 <div align="center">
-  <h2>Enabling extensibility in operating systems throughobject-orientation and reflection protocols</h2>
+  <h2>Enabling extensibility in operating systems through object-orientation and reflection protocols</h2>
 </div>
 
 Object-orientation has proved itself to be a robust approach to modeling systems of software in a way that naturally allows programmers to add new capabilities to existing code. This potential for extensibility can also be maximized through deliberate software design decisions. Reflection and metaobject protocols, which provide a way for object-oriented systems to inspect and modify themselves at runtime, provide additional flexibility within individual programs and also eases the process of creating multi-program systems (also known as system integration).
