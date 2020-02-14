@@ -309,7 +309,7 @@ config NFS_COMMON
 	depends on NFSD || NFS_FS || LOCKD
 	default y
 
-source "net/sunrpc/Kconfig"
+# source "net/sunrpc/Kconfig"
 source "fs/ceph/Kconfig"
 source "fs/cifs/Kconfig"
 source "fs/coda/Kconfig"

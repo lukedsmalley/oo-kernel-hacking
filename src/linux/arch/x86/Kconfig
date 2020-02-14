@@ -921,7 +921,7 @@ config GART_IOMMU
 
 	  The GART supports full DMA access for devices with 32-bit access
 	  limitations, on systems with more than 3 GB. This is usually needed
-	  for USB, sound, many IDE/SATA chipsets and some other devices.
+	  for USB, o, many IDE/SATA chipsets and some other devices.
 
 	  Newer systems typically have a modern AMD IOMMU, supported via
 	  the CONFIG_AMD_IOMMU=y config option.

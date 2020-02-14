@@ -100,7 +100,7 @@ source "drivers/media/Kconfig"
 
 source "drivers/video/Kconfig"
 
-source "sound/Kconfig"
+# source "sound/Kconfig"
 
 source "drivers/hid/Kconfig"
 
