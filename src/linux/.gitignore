@@ -87,6 +87,7 @@ modules.order
 #
 !.clang-format
 !.cocciconfig
+!.config-projectdefault
 !.get_maintainer.ignore
 !.gitattributes
 !.gitignore
