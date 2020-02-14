@@ -10,7 +10,5 @@ fi
 # Indentation has been applied relative to working directory depth
 
 pushd "$WORKSPACE_PATH" &> /dev/null
-  qemu-system-x86_64 -kernel build/linux/arch/x86_64/boot/bzImage \
-    -initrd build/initramfs/initramfs.cpio.gz -nographic \
-    -append "console=ttyS0"
+  rm -rf build
 popd &> /dev/null # $WORKSPACE_PATH

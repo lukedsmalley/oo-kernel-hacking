@@ -79,7 +79,7 @@ function compareTrees(from, to, base='') {
     if (!to.directories[name]) {
       console.log(`${redBright('-')}  D  ${join(base, name)}`)
     } else {
-      compareTrees(from.directories[name], to.directories[name], name)
+      compareTrees(from.directories[name], to.directories[name], join(base, name))
     }
   }
 

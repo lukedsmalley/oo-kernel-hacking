@@ -21,10 +21,10 @@ fi
 
 qpushd "$WORKSPACE_PATH"
 
-  if [[ -d build ]] || [[ -d tree-snapshots ]]; then
-    echo 'The "build" ad/or "tree-snapshots" directories already exist, so'
-    echo 'everything should already be configured. Delete them to'
-    echo 'reconfigure everything again and start over.'
+  if [[ -d build ]]; then
+    echo 'The "build" directory already exists, so everything should'
+    echo 'already be configured. Delete it to reconfigure everything'
+    echo 'again and start over.'
     echo
     qpopd "$WORKSPACE_PATH"
     exit 1
