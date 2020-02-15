@@ -41,7 +41,7 @@ obj-y += power/
 obj-y += printk/
 obj-y += irq/
 obj-y += rcu/
-obj-y += livepatch/
+# obj-y += livepatch/
 obj-y += dma/
 
 obj-$(CONFIG_CHECKPOINT_RESTORE) += kcmp.o

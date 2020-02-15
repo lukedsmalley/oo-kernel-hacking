@@ -114,9 +114,9 @@ source "fs/crypto/Kconfig"
 
 source "fs/verity/Kconfig"
 
-source "fs/notify/Kconfig"
+# source "fs/notify/Kconfig"
 
-source "fs/quota/Kconfig"
+# source "fs/quota/Kconfig"
 
 source "fs/autofs/Kconfig"
 source "fs/fuse/Kconfig"

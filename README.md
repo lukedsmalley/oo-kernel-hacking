@@ -8,7 +8,7 @@
 2. Implement as much of the kernel's responsibilities in bytecode format as possible
 Completing the runtime is the project expectation, rebuilding the rest of the kernel interface is an optimistic target.
 
-See [the proposal document](docs/PROPOSAL.md) for the project goals that were formally proposed at the beginning of the semester.
+See [the proposal document](docs/project-proposal.md) for the project goals that were formally proposed at the beginning of the semester.
 
 ## Goals
 The overarching goal is to create a whole new runtime and embed it at (nearly) the bottom of the operating system, rather than simply grafting the .NET Core runtime into the kernel sources or something like that.
