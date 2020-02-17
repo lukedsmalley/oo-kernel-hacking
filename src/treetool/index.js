@@ -55,10 +55,6 @@ function formatCount(n) {
   return formattedN
 }
 
-function formatDifference(n) {
-
-}
-
 function compareTrees(from, to, base='') {
   for (const name in from.files) {
     if (!to.files[name]) {
@@ -92,15 +88,15 @@ function compareTrees(from, to, base='') {
 
 async function main() {
   if (process.argv.length < 3) {
-    console.log('Expected dtree command ("snapshot" or "compare")')
+    console.log('Expected treetool command ("snapshot" or "compare")')
     console.log()
-    console.log('Usage: dtree (snapshot|s) [<source-dir>] <snap-file-dest>')
-    console.log('       dtree (compare|c) <from-tree-file> <to-tree-file>')
+    console.log('Usage: treetool (snapshot|s) [<source-dir>] <snap-file-dest>')
+    console.log('       treetool (compare|c) <from-tree-file> <to-tree-file>')
   } else if ('snapshot'.startsWith(process.argv[2])) {
     if (process.argv.length < 4) {
       console.log('Expected source directory and/or snapshot destination')
       console.log()
-      console.log('Usage: dtree (snapshot|s) [<source-dir>] <snap-file-dest>')
+      console.log('Usage: treetool (snapshot|s) [<source-dir>] <snap-file-dest>')
     } else {
       const destination = process.argv[process.argv.length < 5 ? 3 : 4]
       const source = process.argv.length < 5 ? '.' : process.argv[3]
@@ -113,17 +109,17 @@ async function main() {
     if (process.argv.length < 5) {
       console.log('Expected two snapshot file paths')
       console.log()
-      console.log('Usage: dtree (compare|c) <from-snap-file> <to-snap-file>')
+      console.log('Usage: treetool (compare|c) <from-snap-file> <to-snap-file>')
     } else {
       compareTrees(
         await readJSON(process.argv[3], { encoding: 'utf8' }),
         await readJSON(process.argv[4], { encoding: 'utf8' }))
     }
   } else {
-    console.log('Expected dtree command ("snapshot" or "compare")')
+    console.log('Expected treetool command ("snapshot" or "compare")')
     console.log()
-    console.log('Usage: dtree (snapshot|s) [<source-dir>] <snap-file-dest>')
-    console.log('       dtree (compare|c) <from-tree-file> <to-tree-file>')
+    console.log('Usage: treetool (snapshot|s) [<source-dir>] <snap-file-dest>')
+    console.log('       treetool (compare|c) <from-tree-file> <to-tree-file>')
   }
   console.log()
 }
