@@ -3,13 +3,11 @@ set -o pipefail
 
 # "$@" IS USED LATER TO ACCEPT ARGUMENTS FOR MAKE
 
-# Silent pushd
-qpushd () {
+pushd_silently () {
   pushd "$1" &> /dev/null
 }
 
-# Silent popd
-qpopd () {
+popd_silently () {
   popd &> /dev/null
 }
 
@@ -21,30 +19,30 @@ fi
 
 # Indentation has been applied relative to working directory depth
 
-qpushd "$WORKSPACE_PATH"
+pushd_silently "$WORKSPACE_PATH"
 
-  qpushd build
+  pushd_silently build
 
-    qpushd linux
+    pushd_silently linux
       make "$@"
       ../../treetool snapshot . ../../tree-snapshots/linux-built.tree
-    qpopd linux
+    popd_silently linux
 
-    qpushd busybox
+    pushd_silently busybox
       make "$@"
       ../../treetool snapshot . ../../tree-snapshots/busybox-built.tree
       make install
       ../../treetool snapshot . ../../tree-snapshots/busybox-installed.tree
-    qpopd busybox
+    popd_silently busybox
 
     mkdir -p initramfs/root
-    qpushd initramfs/root
+    pushd_silently initramfs/root
       mkdir -p bin sbin etc proc sys usr/bin usr/sbin
       cp -a ../../busybox/_install/* .
       cp -r ../../../src/initramfs/* .
       find . -print0 | cpio --null -ov --format=newc | gzip -9 > ../initramfs.cpio.gz
-    qpopd initramfs/root
+    popd_silently initramfs/root
     
-  qpopd build
+  popd_silently build
 
-qpopd "$WORKSPACE_PATH"
+popd_silently "$WORKSPACE_PATH"
