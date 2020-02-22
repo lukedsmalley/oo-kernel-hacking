@@ -1,26 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
 
-#define STACK_SIZE 4096
+#include "instructions.c"
 
-int main() {
-  unsigned char program[] = { 0 };
-  int programLength = sizeof(program) / sizeof(unsigned char);
 
-  unsigned char stack[STACK_SIZE];
-  int stackPointer = 0;
 
-  for (int i = 0; i < STACK_SIZE; i++) {
-    stack[i] = 0;
+int main(const int argCount, const char **args) {
+  if (argCount < 2) {
+    printf("Expected a program file name.\n\n");
+    printf("Usage: stackmachine <program-file>\n\n");
+    return 1;
   }
 
-  int programPointer = 0;
+  /* Load bytecode program from file */
+  uint8_t *program;
+  int programLength;
+  FILE *file = fopen(args[1], "rb");
+  fseek(file, 0, SEEK_END);
+  programLength = ftell(file);
+  rewind(file);
+  program = malloc(programLength * sizeof(uint8_t));
+  fread(program, programLength, 1, file);
+  fclose(file);
 
-  while (programPointer < programLength) {
-    switch(program[programPointer]) {
-      default:
-        printf("Unknown instruction %d\n", program[programPointer]);
-        return 1;
-    }
+  /* Set up stack and program pointers */
+  stack_t stack;
+  int instruction = 0;
+
+  while (instruction < programLength) {
+    (*instructionHandlers[program[instruction]])(&stack, program, &instruction);
   }
+
+  free(program);
+  printf("\n");
 }
