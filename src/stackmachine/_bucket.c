@@ -1,9 +1,3 @@
-#include <stdio.h>
-
-int main() {
-  printf("0x%x\n", (unsigned char)(-4));
-}
-
 
 // Skipped arglist, gt/lt and equal ops, break, callvirt, calli, castclass,
 // push if ops, ckfinite, local memory ops, exception ops, jmp, no { checks },
@@ -57,3 +51,18 @@ int main() {
 // #define I_UNBOX
 // #define I_EXCLUSIVE_OR
 
+short readShort(const uint8_t *buffer, int position) {
+  return buffer[position] + ((short)buffer[++position] << 8);
+}
+
+int readInt(const uint8_t *buffer, int position) {
+  return buffer[position] + ((int)buffer[++position] << 8) +
+    ((int)buffer[++position] << 16) + ((int)buffer[++position] << 24);
+}
+
+long readLong(const uint8_t *buffer, int position) {
+  return buffer[position] + ((long)buffer[++position] << 8) +
+    ((long)buffer[++position] << 16) + ((long)buffer[++position] << 24) +
+    ((long)buffer[++position] << 32) + ((long)buffer[++position] << 40) +
+    ((long)buffer[++position] << 48) + ((long)buffer[++position] << 56);
+}

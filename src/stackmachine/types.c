@@ -1,22 +1,31 @@
-#include <stdint.h>
+#ifndef __TYPES__
+#define __TYPES__
+
+typedef unsigned char byte;
+typedef unsigned long ulong;
 
 typedef struct {
-  uint8_t buffer[4096];
-  int top;
-} stack_t;
+  void *location;
+  ulong size;
+} Allocation;
 
-short readShort(const uint8_t *buffer, int position) {
-  return buffer[position] + ((short)buffer[++position] << 8);
-}
+typedef void (*InstructionHandler)();
 
-int readInt(const uint8_t *buffer, int position) {
-  return buffer[position] + ((int)buffer[++position] << 8) +
-    ((int)buffer[++position] << 16) + ((int)buffer[++position] << 24);
-}
+typedef struct {
+  byte length;
+  InstructionHandler handler;
+} Instruction;
 
-long readLong(const uint8_t *buffer, int position) {
-  return buffer[position] + ((long)buffer[++position] << 8) +
-    ((long)buffer[++position] << 16) + ((long)buffer[++position] << 24) +
-    ((long)buffer[++position] << 32) + ((long)buffer[++position] << 40) +
-    ((long)buffer[++position] << 48) + ((long)buffer[++position] << 56);
-}
+typedef struct {
+  ulong length;
+  ulong location;
+} Function;
+
+typedef struct {
+  byte *data;
+  ulong length;
+  Function *functions;
+  ulong functionCount;
+} Program;
+
+#endif
