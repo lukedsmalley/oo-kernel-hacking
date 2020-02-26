@@ -5,12 +5,13 @@
 #include "handlers.c"
 #include "nice-things.c"
 #include "read-buffer.c"
+#include "machine.c"
 
 Instruction instructions[] = {
   /* 0: nop */ { 0, handleNoOperationInstruction }
 };
 
-Program_ loadProgram(const char *filename) {
+Program_ loadProgram_(const char *filename) {
   // TODO: Check niceAlloc return value
   Program_ program;
   FILE *file = fopen(filename, "rb");
@@ -59,7 +60,7 @@ int main(int argCount, const char **args) {
     return 1;
   }
 
-  Program_ program = loadProgram(args[1]);
+  Program_ program = loadProgram_(args[1]);
   int programPointer = 0;
 
   while (programPointer < program.length) {

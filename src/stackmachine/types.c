@@ -1,9 +1,18 @@
 #ifndef __TYPES__
 #define __TYPES__
 
+#ifndef true
+#define true 1
+#endif
+
+#ifndef false
+#define false 0
+#endif
+
 typedef char boolean;
 typedef unsigned char byte;
 typedef unsigned long ulong;
+typedef char *string;
 
 typedef struct {
   void *location;
@@ -28,11 +37,5 @@ typedef struct {
   Function_ *functions;
   ulong functionCount;
 } Program_;
-
-typedef struct {
-  void *handle;
-  byte (*next)(void*);
-  boolean (*hasNext)(void*);
-} Stream;
 
 #endif
