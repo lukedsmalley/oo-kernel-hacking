@@ -4,19 +4,13 @@
 #include "types.c"
 #include "handlers.c"
 #include "nice-things.c"
+#include "read-buffer.c"
 
 Instruction instructions[] = {
   /* 0: nop */ { 0, handleNoOperationInstruction }
 };
 
-long readLong(const byte *buffer, int position) {
-  return buffer[position] + ((long)buffer[++position] << 8) +
-    ((long)buffer[++position] << 16) + ((long)buffer[++position] << 24) +
-    ((long)buffer[++position] << 32) + ((long)buffer[++position] << 40) +
-    ((long)buffer[++position] << 48) + ((long)buffer[++position] << 56);
-}
-
-Program loadPogram(const char *filename) {
+Program loadProgram(const char *filename) {
   // TODO: Check niceAlloc return value
   Program program;
   FILE *file = fopen(filename, "rb");
@@ -27,38 +21,32 @@ Program loadPogram(const char *filename) {
   fread(program.data, program.length, 1, file);
   fclose(file);
 
-  if (program.length < 8) {
-    printf("The class table header is too short.\n");
-    niceExit(1);
-  }
+  ulong classTableSize = readLong(program.data, program.length, 0,
+    "The class table header is too short.\n",
+    "The class table header is too short.\n");
 
-  ulong functionTableLocation = readLong(program.data, 0) + 8;
+  ulong functionTableLocation = classTableSize + 8;
+  ulong functionTableSize = readLong(program.data, program.length, functionTableLocation,
+    "The program is shorter than the class table header says it is.\n",
+    "The function table header is too short.\n");
 
-  if (program.length < functionTableLocation) {
-    printf("The program is shorter than the class table header says it is.\n");
-    niceExit(1);
-  }
-
-  if (program.length < functionTableLocation + 8) {
-    printf("The function table header is too short.\n");
-    niceExit(1);
-  }
-
-  ulong endOfFile = functionTableLocation +
-    readLong(program.data, functionTableLocation) + 8;
-
-  if (program.length < endOfFile) {
+  ulong eof = functionTableLocation + 8 + functionTableSize;
+  if (program.length < eof) {
     printf("The program is shorter than the function table header says it is.\n");
     niceExit(1);
   }
 
   int functionLocation = functionTableLocation + 8;
-  while (functionLocation < endOfFile) {
+  while (functionLocation < eof) {
     program.functions = niceRealloc(program.functions, (++program.functionCount) * sizeof(Function));
-    program.functions[program.functionCount - 1].location = functionLocation;
-    ulong functionLength = readLong(program.data, functionLocation);
-    program.functions[program.functionCount - 1].length = functionLength;
-    functionLocation += functionLength + 8;
+    Function *function = &program.functions[program.functionCount - 1];
+
+    function->offset = functionLocation;
+    function->size = readLong(program.data, program.length, functionLocation,
+      "The program is shorter than the function headers say it is.\n",
+      "");
+    
+    functionLocation += function->size + 8;
   }
   
   return program;
@@ -71,11 +59,11 @@ int main(int argCount, const char **args) {
     return 1;
   }
 
-  Program program = loadPogram(args[1]);
+  Program program = loadProgram(args[1]);
   int programPointer = 0;
 
   while (programPointer < program.length) {
-    byte opCode = program.data[program.functions[0].location + 8 + programPointer];
+    byte opCode = program.data[program.functions[0].offset + 8 + programPointer];
     if (opCode >= sizeof(instructions) / sizeof(Instruction)) {
       handleInvalidInstruction();
     } else {

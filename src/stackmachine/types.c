@@ -1,6 +1,7 @@
 #ifndef __TYPES__
 #define __TYPES__
 
+typedef char boolean;
 typedef unsigned char byte;
 typedef unsigned long ulong;
 
@@ -17,8 +18,8 @@ typedef struct {
 } Instruction;
 
 typedef struct {
-  ulong length;
-  ulong location;
+  ulong offset;
+  ulong size;
 } Function;
 
 typedef struct {
@@ -27,5 +28,21 @@ typedef struct {
   Function *functions;
   ulong functionCount;
 } Program;
+
+typedef struct {
+
+} Class;
+
+typedef struct {
+  Class *classes;
+  ulong classCount;
+  Function *functions;
+  ulong functionCount;
+} NewProgram;
+
+typedef struct {
+  byte (*next)();
+  boolean (*hasNext)();
+} Stream;
 
 #endif
