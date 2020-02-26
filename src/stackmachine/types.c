@@ -17,28 +17,12 @@ typedef struct {
   InstructionHandler handler;
 } Instruction;
 
-typedef struct {
-  ulong offset;
-  ulong size;
-} Function;
-
-typedef struct {
+/*typedef struct {
   byte *data;
   ulong length;
   Function *functions;
   ulong functionCount;
-} Program;
-
-typedef struct {
-
-} Class;
-
-typedef struct {
-  Class *classes;
-  ulong classCount;
-  Function *functions;
-  ulong functionCount;
-} NewProgram;
+} Program;*/
 
 typedef struct {
   byte (*next)();

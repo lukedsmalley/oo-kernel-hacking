@@ -6,12 +6,6 @@
 byte memory[MEMORY_SIZE];
 ulong freeMemoryOffset = 0;
 
-void initializeMemory() {
-  for (ulong i = 0 ; i < MEMORY_SIZE; i++) {
-    memory[i] = 0;
-  }
-}
-
 void writeLongUnchecked(byte *buffer, ulong offset, long value) {
   for (byte i = 8; i--;) {
     buffer[offset + i] = value >> (i * 8);
@@ -26,19 +20,47 @@ long readLongUnchecked(const byte *buffer, ulong offset) {
 }
 
 void *allocate(ulong size) {
-  if (freeMemoryOffset + size + 8 > MEMORY_SIZE) {
+  if (size == 0) {
     return NULL;
   }
-  writeLongUnchecked(memory, freeMemoryOffset, size);
+  ulong allocationOffset = freeMemoryOffset;
   freeMemoryOffset += size + 8;
-  return &memory[freeMemoryOffset - size];
+  if (freeMemoryOffset > MEMORY_SIZE) {
+    return NULL;
+  }
+  writeLongUnchecked(memory, allocationOffset, size);
+  allocationOffset += 8;
+  for (ulong i = 0; i < size; i++) {
+    memory[allocationOffset + i] = 0;
+  }
+  return &memory[allocationOffset];
 }
 
-void free(void *allocation) {
-  ulong offset = (byte*)allocation - memory;
-  ulong end = offset + readLongUnchecked(memory, offset - 8);
-  while (offset < end) {
+void deallocate(const void *allocation) {
+  if (allocation == NULL) {
+    return;
+  }
+  ulong offset = (byte*)allocation - memory - 8;
+  ulong end = offset + 8 + readLongUnchecked(memory, offset);
+  while (end < freeMemoryOffset) {
     memory[offset++] = memory[end];
     memory[end++] = 0;
   }
+  freeMemoryOffset = end;
+}
+
+void *reallocate(const void *allocation, ulong size) {
+  byte *reallocation = allocate(size);
+  if (allocation == NULL) {
+    return reallocation;
+  }
+  ulong minSize = readLongUnchecked(memory, (byte*)allocation - memory - 8);
+  if (size < minSize) {
+    minSize = size;
+  }
+  for (ulong i = 0; i < minSize; i++) {
+    reallocation[i] = ((byte*)allocation)[i];
+  }
+  deallocate(allocation);
+  return reallocation;
 }
