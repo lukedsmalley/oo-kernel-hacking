@@ -3,8 +3,27 @@
 #define NULL 0
 #define MEMORY_SIZE 4096
 
-byte memory[MEMORY_SIZE];
-ulong freeMemoryOffset = 0;
+
+typedef struct {
+  byte *data;
+  ulong size;
+  ulong usedSize;
+} AllocationBuffer;
+
+typedef struct {
+  ulong size;
+  byte type;
+} AllocationHeader;
+
+typedef struct {
+  ulong *size;
+  byte *type;
+} AllocationHeaderChange;
+
+
+byte memoryData[MEMORY_SIZE];
+AllocationBuffer memory = { memoryData, MEMORY_SIZE, 0 };
+
 
 void writeLongUnchecked(byte *buffer, ulong offset, long value) {
   for (byte i = 8; i--;) {
@@ -19,48 +38,73 @@ long readLongUnchecked(const byte *buffer, ulong offset) {
     (buffer[++offset] << 48) + (buffer[++offset] << 56);
 }
 
-void *allocate(ulong size) {
-  if (size == 0) {
+void *allocateFromBuffer(AllocationBuffer *buffer, AllocationHeader header) {
+  if (header.size == 0 || buffer->usedSize + header.size + sizeof(AllocationHeader) > buffer->size) {
     return NULL;
   }
-  ulong allocationOffset = freeMemoryOffset;
-  freeMemoryOffset += size + 8;
-  if (freeMemoryOffset > MEMORY_SIZE) {
-    return NULL;
+  for (ulong i = 0; i < sizeof(AllocationHeader); i++) {
+    buffer->data[buffer->usedSize + i] = ((byte*)&header)[i];
   }
-  writeLongUnchecked(memory, allocationOffset, size);
-  allocationOffset += 8;
-  for (ulong i = 0; i < size; i++) {
-    memory[allocationOffset + i] = 0;
+  buffer->usedSize += sizeof(AllocationHeader);
+  for (ulong i = 0; i < header.size; i++) {
+    buffer->data[buffer->usedSize + i] = 0;
   }
-  return &memory[allocationOffset];
+  buffer->usedSize += header.size;
+  return &buffer->data[buffer->usedSize - header.size];
 }
 
-void deallocate(const void *allocation) {
+void deallocateFromBuffer(AllocationBuffer *buffer, const void *allocation) {
   if (allocation == NULL) {
     return;
   }
-  ulong offset = (byte*)allocation - memory - 8;
-  ulong end = offset + 8 + readLongUnchecked(memory, offset);
-  while (end < freeMemoryOffset) {
-    memory[offset++] = memory[end];
-    memory[end++] = 0;
+  ulong offset = (byte*)allocation - buffer->data - sizeof(AllocationHeader);
+  ulong end = offset + sizeof(AllocationHeader) + readLongUnchecked(buffer->data, offset);
+  while (end < buffer->usedSize) {
+    buffer->data[offset++] = buffer->data[end];
   }
-  freeMemoryOffset = end;
+  buffer->usedSize = end;
 }
 
-void *reallocate(const void *allocation, ulong size) {
-  byte *reallocation = allocate(size);
+AllocationHeader getAllocationHeader(const AllocationBuffer *buffer, const void *allocation) {
+  AllocationHeader header = {};
+  ulong headerOffset = (byte*)allocation - buffer->data - sizeof(AllocationHeader);
+  for (ulong i = 0; i < sizeof(AllocationHeader); i++) {
+    ((byte*)&header)[i] = buffer->data[headerOffset + i];
+  }
+  return header;
+}
+
+void *reallocateFromBuffer(const AllocationBuffer *buffer, const void *allocation, AllocationHeaderChange headerChange) {
+  AllocationHeader oldHeader = getAllocationHeader(buffer, allocation);
+  byte *reallocation = allocateFromBuffer(buffer, (AllocationHeader) {
+    .size = headerChange.size == NULL ? oldHeader.size : *headerChange.size,
+    .type = headerChange.type == NULL ? oldHeader.type : *headerChange.type,
+  });
   if (allocation == NULL) {
     return reallocation;
   }
-  ulong minSize = readLongUnchecked(memory, (byte*)allocation - memory - 8);
-  if (size < minSize) {
-    minSize = size;
+  ulong minSize = oldHeader.size;
+  if (headerChange.size != NULL && *headerChange.size < minSize) {
+    minSize = *headerChange.size;
   }
   for (ulong i = 0; i < minSize; i++) {
     reallocation[i] = ((byte*)allocation)[i];
   }
-  deallocate(allocation);
+  deallocateFromBuffer(buffer, allocation);
   return reallocation;
+}
+
+void *allocate(ulong size) {
+  return allocateFromBuffer(&memory, (AllocationHeader){ size, 0 });
+}
+
+void deallocate(const void *allocation) {
+  deallocateFromBuffer(&memory, allocation);
+}
+
+void *reallocate(const void *allocation, ulong size) {
+  return reallocateFromBuffer(&memory, allocation, (AllocationHeaderChange) {
+    .size = size,
+    .type = NULL
+  });
 }

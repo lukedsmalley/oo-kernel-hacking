@@ -17,7 +17,7 @@ typedef struct {
 } Program;
 
 void loadClasses(const Program *program, const Stream *stream) {
-  ulong classTableSize = stream->next()
+  
 }
 
 Program loadProgram(const Stream *stream) {

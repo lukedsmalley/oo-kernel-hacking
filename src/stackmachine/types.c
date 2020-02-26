@@ -17,16 +17,22 @@ typedef struct {
   InstructionHandler handler;
 } Instruction;
 
-/*typedef struct {
-  byte *data;
-  ulong length;
-  Function *functions;
-  ulong functionCount;
-} Program;*/
+typedef struct {
+  ulong offset;
+  ulong size;
+} Function_;
 
 typedef struct {
-  byte (*next)();
-  boolean (*hasNext)();
+  byte *data;
+  ulong length;
+  Function_ *functions;
+  ulong functionCount;
+} Program_;
+
+typedef struct {
+  void *handle;
+  byte (*next)(void*);
+  boolean (*hasNext)(void*);
 } Stream;
 
 #endif

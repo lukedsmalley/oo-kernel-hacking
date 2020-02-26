@@ -10,9 +10,9 @@ Instruction instructions[] = {
   /* 0: nop */ { 0, handleNoOperationInstruction }
 };
 
-Program loadProgram(const char *filename) {
+Program_ loadProgram(const char *filename) {
   // TODO: Check niceAlloc return value
-  Program program;
+  Program_ program;
   FILE *file = fopen(filename, "rb");
   fseek(file, 0, SEEK_END);
   program.length = ftell(file);
@@ -38,8 +38,8 @@ Program loadProgram(const char *filename) {
 
   int functionLocation = functionTableLocation + 8;
   while (functionLocation < eof) {
-    program.functions = niceRealloc(program.functions, (++program.functionCount) * sizeof(Function));
-    Function *function = &program.functions[program.functionCount - 1];
+    program.functions = niceRealloc(program.functions, (++program.functionCount) * sizeof(Function_));
+    Function_ *function = &program.functions[program.functionCount - 1];
 
     function->offset = functionLocation;
     function->size = readLong(program.data, program.length, functionLocation,
@@ -59,7 +59,7 @@ int main(int argCount, const char **args) {
     return 1;
   }
 
-  Program program = loadProgram(args[1]);
+  Program_ program = loadProgram(args[1]);
   int programPointer = 0;
 
   while (programPointer < program.length) {
