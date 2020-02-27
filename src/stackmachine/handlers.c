@@ -1,6 +1,7 @@
-#include <stdio.h>
+#ifndef __HANDLERS__
+#define __HANDLERS__
 
-#include "nice-things.c"
+#include <stdio.h>
 
 void handleNoOperationInstruction() {
   printf("nop\n");
@@ -8,5 +9,7 @@ void handleNoOperationInstruction() {
 
 void handleInvalidInstruction() {
   printf("An invalid instruction was encountered.\n");
-  niceExit(1);
+  exit(1);
 }
+
+#endif

@@ -1,17 +1,12 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "types.c"
-#include "handlers.c"
-#include "nice-things.c"
-#include "read-buffer.c"
-#include "machine.c"
+#include "program.c"
+#include "file-stream.c"
+#include "stream.c"
+#include "runtime.c"
 
-Instruction instructions[] = {
-  /* 0: nop */ { 0, handleNoOperationInstruction }
-};
-
-Program_ loadProgram_(const char *filename) {
+/*Program_ loadProgram_(const char *filename) {
   // TODO: Check niceAlloc return value
   Program_ program;
   FILE *file = fopen(filename, "rb");
@@ -51,7 +46,7 @@ Program_ loadProgram_(const char *filename) {
   }
   
   return program;
-}
+}*/
 
 int main(int argCount, const char **args) {
   if (argCount < 2) {
@@ -60,18 +55,11 @@ int main(int argCount, const char **args) {
     return 1;
   }
 
-  Program_ program = loadProgram_(args[1]);
-  int programPointer = 0;
-
-  while (programPointer < program.length) {
-    byte opCode = program.data[program.functions[0].offset + 8 + programPointer];
-    if (opCode >= sizeof(instructions) / sizeof(Instruction)) {
-      handleInvalidInstruction();
-    } else {
-      instructions[opCode].handler();
-      programPointer += instructions[opCode].length + 1;
-    }
-  }
-
-  niceExit(0);
+  Stream in = openFileStream(args[1]);
+  printf("0\n");
+  Program program = loadProgram(in);
+  printf("1\n");
+  runProgram(program);
+  printf("2\n");
+  destroyProgram(program);
 }

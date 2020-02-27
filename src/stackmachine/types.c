@@ -1,6 +1,10 @@
 #ifndef __TYPES__
 #define __TYPES__
 
+#ifndef NULL
+#define NULL ((void*)0)
+#endif
+
 #ifndef true
 #define true 1
 #endif
@@ -12,19 +16,6 @@
 typedef char boolean;
 typedef unsigned char byte;
 typedef unsigned long ulong;
-typedef char *string;
-
-typedef struct {
-  void *location;
-  ulong size;
-} Allocation;
-
-typedef void (*InstructionHandler)();
-
-typedef struct {
-  byte length;
-  InstructionHandler handler;
-} Instruction;
 
 typedef struct {
   ulong offset;
