@@ -2,11 +2,8 @@
 
 F=../../build/program.bin
 
-# Class table length
-printf '\x00\x00\x00\x00\x00\x00\x00\x00' > $F
-
 # Function table length
-printf '\x01\x00\x00\x00\x00\x00\x00\x00' >> $F
+printf '\x01\x00\x00\x00\x00\x00\x00\x00' > $F
 
 # Function 0
 # | Length

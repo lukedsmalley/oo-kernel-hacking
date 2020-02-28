@@ -56,10 +56,7 @@ int main(int argCount, const char **args) {
   }
 
   Stream in = openFileStream(args[1]);
-  printf("0\n");
   Program program = loadProgram(in);
-  printf("1\n");
   runProgram(program);
-  printf("2\n");
   destroyProgram(program);
 }
