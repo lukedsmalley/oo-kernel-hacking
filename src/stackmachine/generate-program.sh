@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-F=../../build/program.bin
+F=../../build/stackmachine/program.bin
 
 # Function table length
 printf '\x01\x00\x00\x00\x00\x00\x00\x00' > $F

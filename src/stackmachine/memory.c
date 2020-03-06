@@ -15,7 +15,7 @@ void *alloc(ulong size) {
 
 void *clone(const byte *data, ulong size) {
   byte *allocation = allocateFromBuffer(&memory, (AllocationHeader){ size, 0 });
-  return copy(allocation, data, size);
+  return moveBlockBytes(allocation, data, size);
 }
 
 char *String(char *message) {

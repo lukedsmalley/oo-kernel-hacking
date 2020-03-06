@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-mkdir -p ../../build
-gcc -o ../../build/main main.c
+mkdir -p ../../build/stackmachine
+gcc -o ../../build/stackmachine/main main.c
 ./generate-program.sh
-../../build/main ../../build/program.bin
+../../build/stackmachine/main ../../build/stackmachine/program.bin

@@ -31,6 +31,7 @@ StreamItem readAndCombineStreamItems(Stream stream, byte count) {
     if (item.done) {
       return item;
     }
+    printf("%d\n", item.value);
     value += item.value << (i * stream.itemSize);
   }
   return (StreamItem) {
@@ -61,6 +62,7 @@ StreamItemList readStreamItems(Stream stream, ulong count) {
         .values = { NULL, 0, stream.itemSize }
       };
     }
+    printf("%d\n", item.value);
     addToList(&values, &item.value, stream.itemSize);
   }
   return (StreamItemList) {
