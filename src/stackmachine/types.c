@@ -13,6 +13,10 @@
 #define false 0
 #endif
 
+#ifndef test
+#define test
+#endif
+
 typedef char boolean;
 typedef unsigned char byte;
 typedef unsigned long ulong;

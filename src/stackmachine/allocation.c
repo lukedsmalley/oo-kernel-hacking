@@ -37,7 +37,7 @@ void pushMemory(const void **dest, const void *from, const void *to) {
 void pushZeroBlock(const void **dest, ulong size) {
   void *end = *dest + size;
   while (*dest < end) {
-    *((byte*)*dest++) = 0;
+    *((byte*)(*dest)++) = 0;
   }
 }
 
@@ -48,7 +48,7 @@ void *allocFromBuffer(AllocBuffer *buffer, AllocHeader header) {
   }
   pushMemory(&buffer->free, &header, endof(header));
   pushZeroBlock(&buffer->free, header.size);
-  return &buffer->free - header.size;
+  return buffer->free - header.size;
 }
 
 void deallocFromBuffer(AllocBuffer *buffer, const void *allocation) {

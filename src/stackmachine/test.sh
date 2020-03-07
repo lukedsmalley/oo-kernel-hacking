@@ -41,7 +41,7 @@ runTest () {
 
 IFS=$'\n'
 for TEST_FILE in test/*; do
-  for TEST in `grep -E '^int [a-zA-Z_]+\(\).*\{.*$' $TEST_FILE | sed -E 's/^int ([a-zA-Z_]+)\(\).*\{.*$/\1/'`; do
+  for TEST in `grep -E '^test int [a-zA-Z_]+\(\).*\{.*$' $TEST_FILE | sed -E 's/^test int ([a-zA-Z_]+)\(\).*\{.*$/\1/'`; do
     runTest $TEST
   done
 done

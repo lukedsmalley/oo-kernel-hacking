@@ -7,15 +7,16 @@
 #define MEMORY_SIZE 4096
 
 byte memoryData[MEMORY_SIZE];
-AllocationBuffer memory = { memoryData, MEMORY_SIZE, 0 };
+AllocBuffer memory = { memoryData, memoryData, endof(memoryData) };
 
 void *alloc(ulong size) {
-  return allocateFromBuffer(&memory, (AllocationHeader){ size, 0 });
+  return allocFromBuffer(&memory, (AllocHeader){ size, 0 });
 }
 
 void *clone(const byte *data, ulong size) {
-  byte *allocation = allocateFromBuffer(&memory, (AllocationHeader){ size, 0 });
-  return moveBlockBytes(allocation, data, size);
+  byte *allocation = allocFromBuffer(&memory, (AllocHeader){ size, 0 });
+  moveMemory(allocation, data, data + size);
+  return allocation;
 }
 
 char *String(char *message) {
@@ -31,11 +32,11 @@ char *String(char *message) {
 }
 
 void dealloc(const void *allocation) {
-  deallocateFromBuffer(&memory, allocation);
+  deallocFromBuffer(&memory, allocation);
 }
 
 void *grow(const void *allocation, ulong size) {
-  return reallocateFromBuffer(&memory, allocation, (AllocationHeaderUpdate) {
+  return reallocFromBuffer(&memory, allocation, (AllocHeaderUpdate) {
     .size = &size,
     .type = NULL
   });
