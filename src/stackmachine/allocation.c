@@ -30,7 +30,7 @@ void moveMemory(const void *dest, const void *from, const void *to) {
 
 void pushMemory(const void **dest, const void *from, const void *to) {
   while (from < to) {
-    *((byte*)*dest++) = *((byte*)from++);
+    *((byte*)(*dest)++) = *((byte*)from++);
   }
 }
 

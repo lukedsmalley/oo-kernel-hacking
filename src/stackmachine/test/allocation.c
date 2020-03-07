@@ -6,8 +6,9 @@
 int test_endof() {
   byte value = 0;
 
-  if (endof(value) != &value + sizeof(value)) {
-    printf("endof() doesn't work.\n");
+  if ((byte*)endof(value) - &value != sizeof(value)) {
+    printf("endof() does not return a pointer to the location after the " \
+      "given memory location.\n");
     return 1;
   }
 
@@ -15,11 +16,11 @@ int test_endof() {
 }
 
 int test_pushMemory() {
-  byte from = 1;
-  byte to = 0;
-  byte *dest = &to;
+  long from = 0xfedcba9876543210;
+  long to = 0;
+  long *dest = &to;
 
-  pushMemory(&dest, &to, endof(to));
+  pushMemory(&dest, &from, endof(from));
 
   if (to != from) {
     printf("Data was not copied.\n");
