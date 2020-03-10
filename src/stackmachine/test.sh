@@ -21,15 +21,15 @@ runTest () {
   else
     set +e
     REASON=`../../build/stackmachine/test $1`
-    CODE=$?
+    CODE="$?"
     set -e
   fi
-  if [[ $CODE -eq 0 ]]; then
+  if [[ "$CODE" -eq 0 ]]; then
     printf ": \033[0;32mPassed\033[0m\n"
   else
     printf ": \033[0;31mFailed\033[0m\n"
     echo "  Exited with code $CODE."
-    if [[ $REASON != '' ]]; then
+    if [[ "$REASON" != '' ]]; then
       for LINE in $REASON; do
         echo "  $LINE"
       done
@@ -40,10 +40,43 @@ runTest () {
 }
 
 IFS=$'\n'
-for TEST_FILE in test/*; do
-  for TEST in `grep -E '^test int [a-zA-Z_]+\(\).*\{.*$' $TEST_FILE | sed -E 's/^test int ([a-zA-Z_]+)\(\).*\{.*$/\1/'`; do
-    runTest $TEST
+
+# If there are arguments, use filtering
+if [[ "$#" -gt 0 ]]; then
+  # If one of the arguments is a filename, filter by files
+  for ARG in "$@"; do
+    if [[ -f test/"$ARG" ]]; then
+      for ARG in "$@"; do
+        if [[ -f test/"$ARG" ]]; then
+          for TEST in `grep -E '^test int [a-zA-Z_]+\(\).*\{.*$' test/"$ARG" | sed -E 's/^test int ([a-zA-Z_]+)\(\).*\{.*$/\1/'`; do
+            runTest "$TEST"
+          done
+        fi
+      done
+      rm test/main.generated.c
+      exit 0
+    fi
   done
-done
+
+  # Else filter by test function name
+  for TEST_FILE in test/*; do
+    for TEST in `grep -E '^test int [a-zA-Z_]+\(\).*\{.*$' "$TEST_FILE" | sed -E 's/^test int ([a-zA-Z_]+)\(\).*\{.*$/\1/'`; do
+      for ARG in "$@"; do
+        if [[ "$ARG" = "$TEST" ]]; then
+          runTest "$TEST"
+        fi
+        break
+      done
+    done
+  done
+
+# If there are no arguments, run all tests
+else
+  for TEST_FILE in test/*; do
+    for TEST in `grep -E '^test int [a-zA-Z_]+\(\).*\{.*$' "$TEST_FILE" | sed -E 's/^test int ([a-zA-Z_]+)\(\).*\{.*$/\1/'`; do
+      runTest "$TEST"
+    done
+  done
+fi
 
 rm test/main.generated.c
