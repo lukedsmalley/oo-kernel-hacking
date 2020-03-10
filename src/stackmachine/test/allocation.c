@@ -4,6 +4,7 @@
 #include "../allocation.c"
 
 #define FUN_LONG 0xfedcba9876543210
+#define FUN_LONG_BYTES 0x10, 0x32, 0x54, 0x76, 0x98, 0xba, 0xdc, 0xfe
 
 test int test_endof() {
   byte value = 0;
@@ -148,6 +149,50 @@ test int test_allocFromBuffer_returnsNullWhenOutOfSpace() {
 
   if (allocation != NULL) {
     printf("A pointer was returned.\n");
+    return 1;
+  }
+
+  return 0;
+}
+
+test int test_deallocFromBuffer_shiftsRemainder() {
+  byte memory[] = {
+    /* Allocation Entry */
+    8, 0, 0, 0, 0, 0, 0, 0, /* size */
+    0, 0, 0, 0, 0, 0, 0, 0, /* type */
+    FUN_LONG_BYTES,         /* data (long) */
+    /* Remainder Entry */
+    8, 0, 0, 0, 0, 0, 0, 0,
+    FUN_LONG_BYTES,
+    FUN_LONG_BYTES
+  };
+  AllocBuffer buffer = { memory, endof(memory), endof(memory) };
+  long *allocation = &memory[sizeof(AllocHeader)];
+
+  deallocFromBuffer(&buffer, allocation);
+
+  if (buffer.free != &memory[sizeof(AllocHeader) + 8]) {
+    printf("The free space pointer was not moved backward.\n");
+    return 1;
+  }
+
+  if (((AllocHeader*)memory)->type != FUN_LONG ||
+      *allocation != FUN_LONG) {
+    printf("Remainder was not correctly shifted backward.\n");
+    return 1;
+  }
+
+  return 0;
+}
+
+test int test_deallocFromBuffer_doesNothingForNullPointer() {
+  byte memory[0];
+  AllocBuffer buffer = { memory, memory, memory };
+  
+  deallocFromBuffer(&buffer, NULL);
+
+  if (buffer.free != memory) {
+    printf("The free space pointer was moved.\n");
     return 1;
   }
 
