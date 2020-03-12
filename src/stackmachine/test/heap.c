@@ -9,66 +9,9 @@
 test int endof_returnsEndPointer() {
   byte value = 0;
 
-  if ((byte*)endof(value) - &value != sizeof(value)) {
-    printf("endof() does not return a pointer to the location after the " \
+  if ((byte*)endof(value) - &value != sizeof(value))
+    return !!printf("endof() does not return a pointer to the location after the " \
       "given memory location.\n");
-    return 1;
-  }
-
-  return 0;
-}
-
-test int moveMemory_copiesData() {
-  long from = FUN_LONG;
-  long to = 0;
-
-  moveMemory(&to, &from, endof(from));
-
-  if (to != from) {
-    printf("Data was not copied.\n");
-    return 1;
-  }
-
-  return 0;
-}
-
-test int pushMemory_copiesDataAndIncrementsPointer() {
-  long from = FUN_LONG;
-  long to = 0;
-  long *dest = &to;
-
-  pushMemory(&dest, &from, endof(from));
-
-  if (to != from) {
-    printf("Data was not copied.\n");
-    return 1;
-  }
-
-  if (dest != endof(to)) {
-    printf("Pointer passed by 'const void **dest' of pushMemory has not " \
-      "been incremented.\n");
-    return 1;
-  }
-
-  return 0;
-}
-
-test int pushZeroBlock_zeroesDataAndIncrementsPointer() {
-  long to = FUN_LONG;
-  long *dest = &to;
-
-  pushZeroBlock(&dest, sizeof(to));
-
-  if (to != 0) {
-    printf("Data was not zeroed.\n");
-    return 1;
-  }
-
-  if (dest != endof(to)) {
-    printf("Pointer passed by 'const void **dest' of pushZeroBlock has " \
-      "not been incremented.\n");
-    return 1;
-  }
 
   return 0;
 }
@@ -78,172 +21,218 @@ test int createHeap_returnsHeap() {
   Heap heap = createHeap(memory, sizeof(memory));
   AllocHeader *header = heap.start;
 
-  if (header->end != endof(memory)) {
-    printf("Bad end pointer in placeholder header.\n");
-    return 1;
-  }
+  if (header->end != endof(memory))
+    return !!printf("Bad end pointer in placeholder header.\n");
 
-  if (header->used) {
-    printf("Bad reference count in placeholder header.\n");
-    return 1;
-  }
+  if (header->used)
+    return !!printf("Bad reference count in placeholder header.\n");
 
   return 0;
 }
 
-test int allocFromHeap_addsToHeapAndReturnsPointer() {
-  byte memory[2 * (sizeof(AllocHeader) + sizeof(long)) + sizeof(AllocHeader)];
+test int allocFromHeap_doesNothingForZeroSize() {
+  return !!printf("Test not yet implemented.\n");
+}
+
+test int allocFromHeap_addsToHeapWithExactSpace() {
+  byte memory[sizeof(AllocHeader) + sizeof(long)];
   Heap heap = createHeap(memory, sizeof(memory));
 
   void* allocation = allocFromHeap(&heap, sizeof(long));
 
-  if (allocation == NULL) {
-    printf("A null reference was returned.\n");
-    return 1;
-  }
+  if (allocation == NULL)
+    return !!printf("A null reference was returned.\n");
 
   AllocHeader *header = allocation - sizeof(AllocHeader);
 
-  if (!header->used) {
-    printf("Bad reference count in allocation header.\n");
-    return 1;
-  }
+  if (header != memory)
+    return !!printf("Heap memory wasn't filled from its left-most point.\n");
 
-  if (header->end != sizeof(AllocHeader) + sizeof(long)) {
-    printf("Bad end pointer in allocation header.\n");
-    return 1;
-  }
+  if (header->used != 1)
+    return !!printf("Bad reference count in allocation header.\n");
 
-  if (*(long*)allocation != 0) {
-    printf("Allocated memory wasn't zeroed.\n");
-    return 1;
+  if (header->end != endof(memory))
+    return !!printf("Bad end pointer in allocation header.\n");
+
+  return 0;
+}
+
+test int allocFromHeap_addsToHeapConsecutively() {
+  byte memory[2 * (sizeof(AllocHeader) + sizeof(long))];
+  Heap heap = createHeap(memory, sizeof(memory));
+
+  for (int i = 0; i < 2; i++) {
+    void* allocation = allocFromHeap(&heap, sizeof(long));
+
+    if (allocation == NULL)
+      return !!printf("A null reference was returned.\n");
+
+    AllocHeader *header = allocation - sizeof(AllocHeader);
+
+    if (header != memory + (i * (sizeof(AllocHeader) + sizeof(long))))
+      return !!printf("Heap memory wasn't filled from its left-most point.\n");
+
+    if (header->used != 1)
+      return !!printf("Bad reference count in allocation header.\n");
+
+    if (header->end != allocation + sizeof(long))
+      return !!printf("Bad end pointer in allocation header.\n");
   }
 
   return 0;
 }
 
-/*test int test_allocFromBuffer_writesHeaderAndReturnsZeroedBlock() {
+test int allocFromHeap_addsToHeapAfterPopDeallocation() {
+  byte memory[2 * (sizeof(AllocHeader) + sizeof(long))];
+  Heap heap = createHeap(memory, sizeof(memory));
+
+  void *allocations[2];
+
+  //Allocate items, then deallocate in reverse order
+  allocations[0] = allocFromHeap(&heap, sizeof(long));
+  allocations[1] = allocFromHeap(&heap, sizeof(long));
+  deallocFromHeap(&heap, allocations[1]);
+  deallocFromHeap(&heap, allocations[0]);
+
+  allocations[0] = allocFromHeap(&heap, 2 * sizeof(long));
+
+  if (allocations[0] == NULL)
+    return !!printf("A null reference was returned.\n");
+
+  AllocHeader *header = allocations[0] - sizeof(AllocHeader);
+
+  if (header != memory)
+    return !!printf("Heap memory wasn't filled from its left-most point.\n");
+
+  if (header->used != 1)
+    return !!printf("Bad reference count in allocation header.\n");
+
+  if (header->end != memory + sizeof(AllocHeader) + 2 * sizeof(long))
+    return !!printf("Bad end pointer in allocation header.\n");
+
+  return 0;
+}
+
+test int deallocFromHeap_doesNothingForNullPointer() {
   byte memory[sizeof(AllocHeader) + sizeof(long)];
-  AllocBuffer buffer = { memory, memory, endof(memory) };
-  AllocHeader header = { sizeof(long), FUN_LONG };
+  Heap heap = createHeap(memory, sizeof(memory));
 
-  long *allocation = allocFromBuffer(&buffer, header);
+  //This is a relatively weak test
+  deallocFromHeap(&heap, NULL);
 
-  if (buffer.free != endof(memory)) {
-    printf("The free space pointer wasn't properly incremented.\n");
-    return 1;
+  return 0;
+}
+
+test int deallocFromHeap_mergesUnusedSpace() {
+  byte memory[2 * (sizeof(AllocHeader) + sizeof(long))];
+  Heap heap = createHeap(memory, sizeof(memory));
+
+  void *allocations[2];
+
+  for (int i = 0; i < 2; i++) {
+    allocations[i] = allocFromHeap(&heap, sizeof(long));
   }
 
-  if (allocation == NULL) {
-    printf("No allocation was made though sufficient space was provided.\n");
-    return 1;
-  }
+  for (int i = 1; i >= 0; i--) {
+    deallocFromHeap(&heap, allocations[i]);
 
-  if (allocation != memory + sizeof(header)) {
-    printf("The returned pointer does not point to the allocated space.\n");
-    return 1;
-  }
+    AllocHeader *header = allocations[i] - sizeof(AllocHeader);
 
-  if (*allocation != 0) {
-    printf("Data was not zeroed.\n");
-    return 1;
-  }
+    if (header->used)
+      return !!printf("Reference count of allocation %d wasn't changed to reflect dereference.\n", i);
 
-  AllocHeader *writtenHeader = (AllocHeader*)&memory;
-
-  if (writtenHeader->size != header.size) {
-    printf("Allocation header is malformed (bad size).\n");
-    return 1;
-  }
-
-  if (writtenHeader->type != header.type) {
-    printf("Allocation header is malformed (bad type).\n");
-    return 1;
+    if (header->end != endof(memory))
+      return !!printf("Bad end pointer in allocation %d after deallocation.\n", i);
   }
 
   return 0;
 }
 
-//test int test_allocFromBuffer_returnsNullForZeroSize() {
-  byte memory[sizeof(AllocHeader) + sizeof(long)];
-  AllocBuffer buffer = { memory, memory, endof(memory) };
-  AllocHeader header = { 0, FUN_LONG };
+test int deallocFromHeap_doesNothingForPointersStillInUse() {
+  byte memory[2 * (sizeof(AllocHeader) + sizeof(long))];
+  Heap heap = createHeap(memory, sizeof(memory));
 
-  long *allocation = allocFromBuffer(&buffer, header);
+  void *allocation = allocFromHeap(&heap, sizeof(long));
+  AllocHeader *header = allocation - sizeof(AllocHeader);
 
-  if (buffer.free != buffer.start) {
-    printf("The free space pointer was moved.\n");
-    return 1;
-  }
+  ++header->used;
 
-  if (allocation != NULL) {
-    printf("A pointer was returned.\n");
-    return 1;
-  }
-
-  return 0;
-}
-
-//test int test_allocFromBuffer_returnsNullWhenOutOfSpace() {
-  byte memory[sizeof(AllocHeader) + sizeof(int)];
-  AllocBuffer buffer = { memory, memory, endof(memory) };
-  AllocHeader header = { sizeof(long), FUN_LONG };
-
-  long *allocation = allocFromBuffer(&buffer, header);
-
-  if (buffer.free != buffer.start) {
-    printf("The free space pointer was moved.\n");
-    return 1;
-  }
-
-  if (allocation != NULL) {
-    printf("A pointer was returned.\n");
-    return 1;
-  }
-
-  return 0;
-}*/
-
-/*test int test_deallocFromBuffer_shiftsRemainder() {
-  byte memory[] = {*/
-    /* Allocation Entry */
-    //8, 0, 0, 0, 0, 0, 0, 0, /* size */
-    //0, 0, 0, 0, 0, 0, 0, 0, /* type */
-    //FUN_LONG_BYTES,         /* data (long) */
-    /* Remainder Entry */
-    /*8, 0, 0, 0, 0, 0, 0, 0,
-    FUN_LONG_BYTES,
-    FUN_LONG_BYTES
-  };
-  AllocBuffer buffer = { memory, endof(memory), endof(memory) };
-  long *allocation = &memory[sizeof(AllocHeader)];
-
-  deallocFromBuffer(&buffer, allocation);
-
-  if (buffer.free != &memory[sizeof(AllocHeader) + 8]) {
-    printf("The free space pointer was not moved backward.\n");
-    return 1;
-  }
-
-  if (((AllocHeader*)memory)->type != FUN_LONG ||
-      *allocation != FUN_LONG) {
-    printf("Remainder was not correctly shifted backward.\n");
-    return 1;
-  }
-
-  return 0;
-}*/
-
-/*test int test_deallocFromBuffer_doesNothingForNullPointer() {
-  byte memory[0];
-  AllocBuffer buffer = { memory, memory, memory };
+  deallocFromHeap(&heap, allocation);
   
-  deallocFromBuffer(&buffer, NULL);
+  if (!header->used)
+    return !!printf("Allocated space was marked 'free'.\n");
 
-  if (buffer.free != memory) {
-    printf("The free space pointer was moved.\n");
-    return 1;
-  }
+  if (header->end != allocation + sizeof(long))
+    return !!printf("End pointer in allocation was improperly changed.\n");
 
   return 0;
-}*/
+}
+
+test int shareAlloc_incrementsReferenceCount() {
+  byte memory[sizeof(AllocHeader) + sizeof(long)];
+  Heap heap = createHeap(memory, sizeof(memory));
+
+  void *allocation = allocFromHeap(&heap, sizeof(long));
+  AllocHeader *header = allocation - sizeof(AllocHeader);
+
+  shareAlloc(allocation);
+
+  if (header->used != 2)
+    return !!printf("Reference count was not incremented.\n");
+
+  return 0;
+}
+
+test int reallocFromHeap_doesNothingForZeroSize() {
+  return !!printf("Test not yet implemented.\n");
+}
+
+test int reallocFromHeap_copiesToLocationWithMoreSpace() {
+  byte memory[2 * sizeof(AllocHeader) + sizeof(int) + sizeof(long)];
+  Heap heap = createHeap(memory, sizeof(memory));
+
+  int *allocation = allocFromHeap(&heap, sizeof(int));
+  *allocation = 0xef00ef00;
+  shareAlloc(allocation);
+
+  long *reallocation = reallocFromHeap(&heap, allocation, sizeof(long));
+
+  if (reallocation == NULL)
+    return !!printf("A null reference was returned.\n");
+
+  if (*reallocation == *allocation)
+    return !!printf("Data was not copied.\n");
+
+  AllocHeader *allocHeader = allocation - sizeof(AllocHeader);
+  AllocHeader *reallocHeader = reallocation - sizeof(AllocHeader);
+
+  if (reallocHeader->used == allocHeader->used)
+    return !!printf("Reference count was not copied.\n");
+
+  return 0;
+}
+
+test int reallocFromHeap_copiesToLocationWithLessSpace() {
+  byte memory[2 * sizeof(AllocHeader) + sizeof(int) + sizeof(short)];
+  Heap heap = createHeap(memory, sizeof(memory));
+
+  int *allocation = allocFromHeap(&heap, sizeof(int));
+  *allocation = 0xef00ef00;
+  shareAlloc(allocation);
+
+  short *reallocation = reallocFromHeap(&heap, allocation, sizeof(short));
+
+  if (reallocation == NULL)
+    return !!printf("A null reference was returned.\n");
+
+  if (*reallocation == *allocation)
+    return !!printf("Data was not copied.\n");
+
+  AllocHeader *allocHeader = allocation - sizeof(AllocHeader);
+  AllocHeader *reallocHeader = reallocation - sizeof(AllocHeader);
+
+  if (reallocHeader->used == allocHeader->used)
+    return !!printf("Reference count was not copied.\n");
+
+  return 0;
+}
