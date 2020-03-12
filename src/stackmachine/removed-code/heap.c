@@ -6,21 +6,26 @@
 #define endof(var) \
   ((void*)&var + sizeof(var))
 
+#define NULL_REF -1
+
 typedef struct {
-  byte *start;
-  byte *free;
-  byte *end;
-} AllocBuffer;
+  ulong used;
+  void *value;
+} Reference;
+
+typedef struct {
+  void *start;
+  void *free;
+  void *end;
+  Reference *refTable;
+  Reference *nextFreeRef;
+  Reference *refTableEnd;
+} Heap;
 
 typedef struct {
   ulong size;
-  ulong type;
+  Reference *reference;
 } AllocHeader;
-
-typedef struct {
-  ulong *size;
-  ulong *type;
-} AllocHeaderUpdate;
 
 void moveMemory(const void *dest, const void *from, const void *to) {
   while (from < to) {
@@ -41,18 +46,36 @@ void pushZeroBlock(const void **dest, ulong size) {
   }
 }
 
-void *allocFromBuffer(AllocBuffer *buffer, AllocHeader header) {
-  if (header.size == 0 ||
-      buffer->free + header.size + sizeof(AllocHeader) > buffer->end) {
-    return NULL;
+ulong allocFromHeap(Heap *heap, ulong size) {
+  if (size == 0 ||
+      heap->free + size + sizeof(AllocHeader) > heap->end ||
+      heap->nextFreeRef->used) {
+    return -1;
   }
-  pushMemory(&buffer->free, &header, endof(header));
-  pushZeroBlock(&buffer->free, header.size);
-  return buffer->free - header.size;
+
+  Reference *ref = heap->nextFreeRef;
+  ++ref->used;
+  ref->value = heap->free;
+
+  do {
+    ++heap->nextFreeRef;
+    if (heap->nextFreeRef == heap->refTableEnd) {
+      heap->nextFreeRef = heap->refTable;
+    }
+    if (!heap->nextFreeRef->used) {
+      break;
+    }
+  } while (heap->nextFreeRef != ref);
+
+  AllocHeader header = { size, ref };
+  pushMemory(&heap->free, &header, endof(header));
+  pushZeroBlock(&heap->free, size);
+
+  return (ref - heap->refTable) / sizeof(Reference);
 }
 
-void deallocFromBuffer(AllocBuffer *buffer, const void *allocation) {
-  if (allocation == NULL) {
+void deallocFromHeap(Heap *heap, ulong ref) {
+  if (ref == -1) {
     return;
   }
   void *start = allocation - sizeof(AllocHeader);
@@ -61,7 +84,7 @@ void deallocFromBuffer(AllocBuffer *buffer, const void *allocation) {
   buffer->free -= size + sizeof(AllocHeader);
 }
 
-void *reallocFromBuffer(AllocBuffer *buffer, const void *allocation, AllocHeaderUpdate headerUpdate) {
+/*void *reallocFromBuffer(AllocBuffer *buffer, const void *allocation, AllocHeaderUpdate headerUpdate) {
   AllocHeader header = { 0, 0 };
   if (allocation != NULL) {
     header = *(AllocHeader*)(allocation - sizeof(AllocHeader));
@@ -80,6 +103,6 @@ void *reallocFromBuffer(AllocBuffer *buffer, const void *allocation, AllocHeader
   moveMemory(reallocation, allocation, allocation + minSize);
   deallocFromBuffer(buffer, allocation);
   return reallocation;
-}
+}*/
 
 #endif

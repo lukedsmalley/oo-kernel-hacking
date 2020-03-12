@@ -1,42 +1,82 @@
-#ifndef __HEAP__
-#define __HEAP__
+#ifndef __ALLOCATION__
+#define __ALLOCATION__
 
 #include "types.c"
 
-#define HEAP_SIZE 128
+#define endof(var) \
+  ((void*)&var + sizeof(var))
 
 typedef struct {
-  ulong clientCount;
-  void *value;
-} Reference;
+  void *start;
+  void *free;
+  void *end;
+} Heap;
 
-Reference referenceTable[HEAP_SIZE];
-ulong nextFreeReferenceIndex = 0;
-ulong nextReferenceID = 0;
-ulong referenceCount = 0;
+typedef struct {
+  void *end;
+  ulong used;
+} AllocHeader;
 
-ulong createObject() {
-  Reference *reference = &referenceTable[referenceCount++];
-  reference->id = nextReferenceID++;
-  reference->clientCount = 0;
-  reference->value = reference->id * 4;
-  return reference->id;
+void moveMemory(const void *dest, const void *from, const void *to) {
+  while (from < to) {
+    *((byte*)dest++) = *((byte*)from++);
+  }
 }
 
-void *getPointerFromReference(ulong id) {
-  ulong start = 0;
-  ulong end = referenceCount;
-  while (start <= end) {
-    ulong i = start + ((end - start) / 2);
-    if (referenceTable[i].id == id) {
-      return referenceTable[i].value;
-    } else if (referenceTable[i].id < id) {
-      start = i + 1;
-    } else {
-      end = i - 1;
+void pushMemory(const void **dest, const void *from, const void *to) {
+  while (from < to) {
+    *((byte*)(*dest)++) = *((byte*)from++);
+  }
+}
+
+void pushZeroBlock(const void **dest, ulong size) {
+  void *end = *dest + size;
+  while (*dest < end) {
+    *((byte*)(*dest)++) = 0;
+  }
+}
+
+Heap createHeap(byte *buffer, ulong size) {
+  AllocHeader *header = buffer;
+  header->end = buffer + size;
+  header->used = 0;
+  return (Heap) { buffer, buffer, header->end };
+}
+
+void *allocFromHeap(Heap *heap, ulong size) {
+  if (size == 0 || heap->free + size + sizeof(AllocHeader) >= heap->end) {
+    return NULL;
+  }
+
+  void *allocation = heap->start;
+  do {
+    AllocHeader *header = allocation;
+    void *end = header->end;
+    if (!header->used && end - allocation <= size + (2 * sizeof(AllocHeader))) {
+      header->end = allocation + size + sizeof(AllocHeader);
+      ++header->used;
+      ((AllocHeader*)header->end)->used = 0;
+      ((AllocHeader*)header->end)->end = end;
+      return allocation + sizeof(AllocHeader);
+    }
+    allocation = end;
+  } while (allocation < heap->end);
+
+  return NULL;
+}
+
+void deallocFromHeap(Heap *heap, void *allocation) {
+  AllocHeader *header = allocation;
+  if (header->used) {
+    --header->used;
+    if (!header->used) {
+      void *end = header->end;
+      while (!((AllocHeader*)end)->used) {
+        end = ((AllocHeader*)end)->end;
+      }
+      header->end = end;
     }
   }
-  return NULL;
 }
 
 #endif

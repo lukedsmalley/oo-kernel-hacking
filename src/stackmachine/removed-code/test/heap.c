@@ -1,12 +1,12 @@
 #include <stdio.h>
 
 #include "../types.c"
-#include "../allocation.c"
+#include "../heap.c"
 
 #define FUN_LONG 0xfedcba9876543210
 #define FUN_LONG_BYTES 0x10, 0x32, 0x54, 0x76, 0x98, 0xba, 0xdc, 0xfe
 
-test int test_endof() {
+test int endof_returnsEndPointer() {
   byte value = 0;
 
   if ((byte*)endof(value) - &value != sizeof(value)) {
@@ -18,7 +18,7 @@ test int test_endof() {
   return 0;
 }
 
-test int test_moveMemory() {
+test int moveMemory_copiesData() {
   long from = FUN_LONG;
   long to = 0;
 
@@ -32,8 +32,8 @@ test int test_moveMemory() {
   return 0;
 }
 
-test int test_pushMemory() {
-  long from = 0xfedcba9876543210;
+test int pushMemory_copiesDataAndIncrementsPointer() {
+  long from = FUN_LONG;
   long to = 0;
   long *dest = &to;
 
@@ -53,8 +53,8 @@ test int test_pushMemory() {
   return 0;
 }
 
-test int test_pushZeroBlock() {
-  long to = 0xfedcba9876543210;
+test int pushZeroBlock_zeroesDataAndIncrementsPointer() {
+  long to = FUN_LONG;
   long *dest = &to;
 
   pushZeroBlock(&dest, sizeof(to));
@@ -73,7 +73,54 @@ test int test_pushZeroBlock() {
   return 0;
 }
 
-test int test_allocFromBuffer_writesHeaderAndReturnsZeroedBlock() {
+test int allocFromHeap_populatesHeap() {
+  Reference refTable[1] = { { 0, NULL } };
+  byte memory[sizeof(AllocHeader) + sizeof(long)];
+  Heap heap = {
+    .start = memory,
+    .free = memory,
+    .end = endof(memory),
+    .refTable = refTable,
+    .nextFreeRef = refTable,
+    .refTableEnd = endof(refTable)
+  };
+
+  ulong ref = allocFromHeap(&heap, sizeof(long));
+
+  if (ref == -1) {
+    printf("A null reference was returned.\n");
+    return 1;
+  }
+
+  if (!refTable[0].used) {
+    printf("The reference table was not populated (Bad holder count).\n");
+    return 1;
+  }
+
+  if (refTable[0].value == NULL) {
+    printf("The reference table was not populated (Bad reference pointer).\n");
+    return 1;
+  }
+
+  if (((AllocHeader*)memory)->size != sizeof(long)) {
+    printf("The heap memory was not populated (Bad size in header).\n");
+    return 1;
+  }
+
+  if (((AllocHeader*)memory)->reference != refTable + (ref * sizeof(Reference))) {
+    printf("The heap memory was not populated (Bad reference in header).\n");
+    return 1;
+  }
+
+  if (*(long*)(memory + sizeof(AllocHeader)) != 0) {
+    printf("The allocated heap memory was not zeroed.\n");
+    return 1;
+  }
+
+  return 0;
+}
+
+/*test int test_allocFromBuffer_writesHeaderAndReturnsZeroedBlock() {
   byte memory[sizeof(AllocHeader) + sizeof(long)];
   AllocBuffer buffer = { memory, memory, endof(memory) };
   AllocHeader header = { sizeof(long), FUN_LONG };
@@ -115,7 +162,7 @@ test int test_allocFromBuffer_writesHeaderAndReturnsZeroedBlock() {
   return 0;
 }
 
-test int test_allocFromBuffer_returnsNullForZeroSize() {
+//test int test_allocFromBuffer_returnsNullForZeroSize() {
   byte memory[sizeof(AllocHeader) + sizeof(long)];
   AllocBuffer buffer = { memory, memory, endof(memory) };
   AllocHeader header = { 0, FUN_LONG };
@@ -135,7 +182,7 @@ test int test_allocFromBuffer_returnsNullForZeroSize() {
   return 0;
 }
 
-test int test_allocFromBuffer_returnsNullWhenOutOfSpace() {
+//test int test_allocFromBuffer_returnsNullWhenOutOfSpace() {
   byte memory[sizeof(AllocHeader) + sizeof(int)];
   AllocBuffer buffer = { memory, memory, endof(memory) };
   AllocHeader header = { sizeof(long), FUN_LONG };
@@ -153,16 +200,16 @@ test int test_allocFromBuffer_returnsNullWhenOutOfSpace() {
   }
 
   return 0;
-}
+}*/
 
-test int test_deallocFromBuffer_shiftsRemainder() {
-  byte memory[] = {
+/*test int test_deallocFromBuffer_shiftsRemainder() {
+  byte memory[] = {*/
     /* Allocation Entry */
-    8, 0, 0, 0, 0, 0, 0, 0, /* size */
-    0, 0, 0, 0, 0, 0, 0, 0, /* type */
-    FUN_LONG_BYTES,         /* data (long) */
+    //8, 0, 0, 0, 0, 0, 0, 0, /* size */
+    //0, 0, 0, 0, 0, 0, 0, 0, /* type */
+    //FUN_LONG_BYTES,         /* data (long) */
     /* Remainder Entry */
-    8, 0, 0, 0, 0, 0, 0, 0,
+    /*8, 0, 0, 0, 0, 0, 0, 0,
     FUN_LONG_BYTES,
     FUN_LONG_BYTES
   };
@@ -183,9 +230,9 @@ test int test_deallocFromBuffer_shiftsRemainder() {
   }
 
   return 0;
-}
+}*/
 
-test int test_deallocFromBuffer_doesNothingForNullPointer() {
+/*test int test_deallocFromBuffer_doesNothingForNullPointer() {
   byte memory[0];
   AllocBuffer buffer = { memory, memory, memory };
   
@@ -197,4 +244,4 @@ test int test_deallocFromBuffer_doesNothingForNullPointer() {
   }
 
   return 0;
-}
+}*/

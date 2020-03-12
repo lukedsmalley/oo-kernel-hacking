@@ -48,7 +48,7 @@ if [[ "$#" -gt 0 ]]; then
     if [[ -f test/"$ARG" ]]; then
       for ARG in "$@"; do
         if [[ -f test/"$ARG" ]]; then
-          for TEST in `grep -E '^test int [a-zA-Z_]+\(\).*\{.*$' test/"$ARG" | sed -E 's/^test int ([a-zA-Z_]+)\(\).*\{.*$/\1/'`; do
+          for TEST in `grep -E '^test int [a-zA-Z0-9_]+\(\).*\{.*$' test/"$ARG" | sed -E 's/^test int ([a-zA-Z0-9_]+)\(\).*\{.*$/\1/'`; do
             runTest "$TEST"
           done
         fi
@@ -60,7 +60,7 @@ if [[ "$#" -gt 0 ]]; then
 
   # Else filter by test function name
   for TEST_FILE in test/*; do
-    for TEST in `grep -E '^test int [a-zA-Z_]+\(\).*\{.*$' "$TEST_FILE" | sed -E 's/^test int ([a-zA-Z_]+)\(\).*\{.*$/\1/'`; do
+    for TEST in `grep -E '^test int [a-zA-Z0-9_]+\(\).*\{.*$' "$TEST_FILE" | sed -E 's/^test int ([a-zA-Z0-9_]+)\(\).*\{.*$/\1/'`; do
       for ARG in "$@"; do
         if [[ "$ARG" = "$TEST" ]]; then
           runTest "$TEST"
@@ -73,7 +73,7 @@ if [[ "$#" -gt 0 ]]; then
 # If there are no arguments, run all tests
 else
   for TEST_FILE in test/*; do
-    for TEST in `grep -E '^test int [a-zA-Z_]+\(\).*\{.*$' "$TEST_FILE" | sed -E 's/^test int ([a-zA-Z_]+)\(\).*\{.*$/\1/'`; do
+    for TEST in `grep -E '^test int [a-zA-Z0-9_]+\(\).*\{.*$' "$TEST_FILE" | sed -E 's/^test int ([a-zA-Z0-9_]+)\(\).*\{.*$/\1/'`; do
       runTest "$TEST"
     done
   done
