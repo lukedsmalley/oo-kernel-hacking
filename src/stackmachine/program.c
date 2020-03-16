@@ -6,6 +6,7 @@
 #include "types.c"
 #include "list.c"
 #include "stream.c"
+#include "heap.c"
 
 typedef struct {
   byte *body;
@@ -43,9 +44,9 @@ void loadFunctions(const Program *program, Stream in) {
   }
 }
 
-Program loadProgram(Stream in) {
+Program loadProgram(Heap heap, Stream in) {
   Program program = {
-    .functions = createList(sizeof(Function))
+    .functions = createList(heap, sizeof(Function))
   };
 
   loadFunctions(&program, in);

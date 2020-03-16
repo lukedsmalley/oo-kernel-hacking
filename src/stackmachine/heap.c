@@ -6,6 +6,9 @@
 #define endof(var) \
   ((void*)&var + sizeof(var))
 
+#define bufferof(var) \
+  ((void*)var), sizeof(var) 
+
 typedef struct {
   void *start;
   void *free;
@@ -17,7 +20,13 @@ typedef struct {
   ulong used;
 } AllocHeader;
 
-Heap createHeap(byte *buffer, ulong size) {
+void moveMemory(const void *dest, const void *from, const void *to) {
+  while (from < to) {
+    *((byte*)dest++) = *((byte*)from++);
+  }
+}
+
+Heap createHeap(void *buffer, ulong size) {
   AllocHeader *header = buffer;
   header->end = buffer + size;
   header->used = 0;
@@ -100,10 +109,7 @@ void *reallocFromHeap(Heap *heap, void *allocation, ulong size) {
   if (reallocation != NULL && allocation != NULL) {
     AllocHeader *header = allocation - sizeof(AllocHeader);
     ulong allocationSize = header->end - allocation + sizeof(AllocHeader);
-    void *end = allocation + (size < allocationSize ? size : allocationSize);
-    while (allocation < end) {
-      *((byte*)reallocation++) = *((byte*)allocation++);
-    }
+    moveMemory(reallocation, allocation, allocation + (size < allocationSize ? size : allocationSize));
   }
 
   return reallocation;

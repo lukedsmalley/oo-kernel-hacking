@@ -16,6 +16,20 @@ test int endof_returnsEndPointer() {
   return 0;
 }
 
+test int moveMemory_copiesData() {
+  long from = FUN_LONG;
+  long to = 0;
+
+  moveMemory(&to, &from, endof(from));
+
+  if (to != from) {
+    printf("Data was not copied.\n");
+    return 1;
+  }
+
+  return 0;
+}
+
 test int createHeap_returnsHeap() {
   byte memory[sizeof(AllocHeader)];
   Heap heap = createHeap(memory, sizeof(memory));

@@ -2,12 +2,12 @@
 #define __MEMORY__
 
 #include "types.c"
-#include "allocation.c"
+#include "heap.c"
 
 #define MEMORY_SIZE 4096
 
 byte memoryData[MEMORY_SIZE];
-AllocBuffer memory = { memoryData, memoryData, endof(memoryData) };
+Heap heap = { memoryData, memoryData, endof(memoryData) };
 
 void *alloc(ulong size) {
   return allocFromBuffer(&memory, (AllocHeader){ size, 0 });
