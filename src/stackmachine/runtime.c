@@ -3,30 +3,42 @@
 
 #include "program.c"
 #include "handlers.c"
-
-typedef void (*InstructionHandler)();
+#include "list.c"
+#include "function-call.c"
 
 typedef struct {
   byte size;
-  InstructionHandler handler;
+  void (*handler)(List *callStack);
 } Instruction;
 
 Instruction instructions[] = {
-  /* 0: nop */ { 0, handleNoOperationInstruction }
+  /* 0: nop */ { 0, handleNoOpInst },
+  /* 1: add_unchecked */ { 0, handleAddUncheckedInst },
 };
 
 void runProgram(Program program) {
-  ulong programPointer = 0;
-  Function function = *((Function*)program.functions.items);
-  while (programPointer < function.size) {
-    byte opCode = function.body[programPointer];
-    if (opCode >= sizeof(instructions) / sizeof(Instruction)) {
-      handleInvalidInstruction();
+  List callStack = createListOnDefaultHeap(sizeof(FunctionCall));
+
+  /* TODO: Pass remaining argv */
+  FunctionCall entryCall = createFunctionCall(
+    program.functions.items,
+    createListOnDefaultHeap(sizeof(void*)));
+  addToList(&callStack, &entryCall, sizeof(entryCall));
+
+  while (callStack.itemCount > 0) {
+    FunctionCall *call = (FunctionCall*)callStack.items + callStack.itemCount - 1;
+    byte *op = call->function->body + call->instPointer;
+    if (op >= call->function->body + call->function->size) {
+      handleFunctionWithoutReturn();
+    } else if (*op >= sizeof(instructions) / sizeof(Instruction)) {
+      handleInvalidInst();
     } else {
-      instructions[opCode].handler();
-      programPointer += instructions[opCode].size + 1;
+      instructions[*op].handler(&callStack);
+      call->instPointer += instructions[*op].size + 1;
     }
   }
+
+  destroyList(callStack);
 }
 
 #endif

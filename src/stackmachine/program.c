@@ -14,10 +14,10 @@ typedef struct {
 } Function;
 
 typedef struct {
-  List /* of Function */ functions;
+  List functions;
 } Program;
 
-void loadFunctions(const Program *program, Stream in) {
+void loadFunctions(Program *program, Stream in) {
   StreamItem functionCount = readStreamQWord(in);
   if (functionCount.done) {
     printf("The function table header is too short.\n");
@@ -31,22 +31,23 @@ void loadFunctions(const Program *program, Stream in) {
       exit(0);
     }
 
-    StreamItemList body = readStreamItems(in, size.value);
-    if (body.done) {
+    List body = readStreamItems(in, size.value);
+    if (body.itemCount < size.value) {
       printf("The program is shorter than the function table header says it is.\n");
       exit(0);
     }
 
-    addToList(&program->functions, &(Function) {
-      .body = body.values.items,
-      .size = body.values.itemCount
-    }, sizeof(Function));
+    Function function = {
+      .body = body.items,
+      .size = body.itemCount
+    };
+    addToList(&program->functions, &function, sizeof(function));
   }
 }
 
-Program loadProgram(Heap heap, Stream in) {
+Program loadProgram(Stream in) {
   Program program = {
-    .functions = createList(heap, sizeof(Function))
+    .functions = createListOnDefaultHeap(sizeof(Function))
   };
 
   loadFunctions(&program, in);

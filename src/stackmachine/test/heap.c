@@ -201,6 +201,10 @@ test int reallocFromHeap_doesNothingForZeroSize() {
   return !!printf("Test not yet implemented.\n");
 }
 
+test int reallocFromHeap_returnsNullOnAllocationFailure() {
+  return !!printf("Test not yet implemented.\n");
+}
+
 test int reallocFromHeap_copiesToLocationWithMoreSpace() {
   byte memory[2 * sizeof(AllocHeader) + sizeof(int) + sizeof(long)];
   Heap heap = createHeap(memory, sizeof(memory));

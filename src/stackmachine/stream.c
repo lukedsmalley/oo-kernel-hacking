@@ -10,14 +10,9 @@ typedef struct {
 } StreamItem;
 
 typedef struct {
-  boolean done;
-  List values;
-} StreamItemList;
-
-typedef struct {
   byte itemSize;
   void *handle;
-  StreamItem (*next)(void*);
+  StreamItem (*next)(void *handle);
 } Stream;
 
 StreamItem readStreamItem(Stream stream) {
@@ -31,8 +26,7 @@ StreamItem readAndCombineStreamItems(Stream stream, byte count) {
     if (item.done) {
       return item;
     }
-    printf("%d\n", item.value);
-    value += item.value << (i * stream.itemSize);
+    value += item.value << (i * 8 * stream.itemSize);
   }
   return (StreamItem) {
     .done = false,
@@ -52,23 +46,17 @@ StreamItem readStreamQWord(Stream stream) {
   return readAndCombineStreamItems(stream, 8);
 }
 
-StreamItemList readStreamItems(Stream stream, ulong count) {
-  List values = { NULL, 0, stream.itemSize };
+List readStreamItems(Stream stream, ulong count) {
+  List values = createListOnDefaultHeap(stream.itemSize);
   for (ulong i = 0; i < count; i++) {
     StreamItem item = stream.next(stream.handle);
     if (item.done) {
-      return (StreamItemList) {
-        .done = true,
-        .values = { NULL, 0, stream.itemSize }
-      };
+      destroyList(values);
+      return createListOnDefaultHeap(stream.itemSize);
     }
-    printf("%d\n", item.value);
     addToList(&values, &item.value, stream.itemSize);
   }
-  return (StreamItemList) {
-    .done = false,
-    .values = values
-  };
+  return values;
 }
 
 #endif

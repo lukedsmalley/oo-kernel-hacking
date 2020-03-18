@@ -20,6 +20,7 @@ StreamItem readItemFromFile(FILE *handle) {
 
 Stream openFileStream(const char *filename) {
   return (Stream) {
+    .itemSize = sizeof(byte),
     .handle = fopen(filename, "rb"),
     .next = readItemFromFile
   };

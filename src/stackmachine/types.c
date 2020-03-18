@@ -17,6 +17,9 @@
 #define test
 #endif
 
+#define endof(var) \
+  ((void*)&var + sizeof(var))
+
 typedef char boolean;
 typedef unsigned char byte;
 typedef unsigned int uint;

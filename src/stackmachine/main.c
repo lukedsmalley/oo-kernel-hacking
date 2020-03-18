@@ -5,9 +5,7 @@
 #include "file-stream.c"
 #include "stream.c"
 #include "runtime.c"
-#include "heap.c"
-
-#define MEMORY_SIZE 4096
+#include "default-heap.c"
 
 int main(int argCount, const char **args) {
   if (argCount < 2) {
@@ -16,11 +14,10 @@ int main(int argCount, const char **args) {
     return 1;
   }
 
-  byte memory[MEMORY_SIZE];
-  Heap heap = createHeap(bufferof(memory));
+  createDefaultHeap();
 
   Stream in = openFileStream(args[1]);
-  Program program = loadProgram(heap, in);
+  Program program = loadProgram(in);
   closeFileStream(in);
 
   runProgram(program);

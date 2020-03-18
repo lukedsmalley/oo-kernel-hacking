@@ -1,13 +1,7 @@
-#ifndef __ALLOCATION__
-#define __ALLOCATION__
+#ifndef __HEAP__
+#define __HEAP__
 
 #include "types.c"
-
-#define endof(var) \
-  ((void*)&var + sizeof(var))
-
-#define bufferof(var) \
-  ((void*)var), sizeof(var) 
 
 typedef struct {
   void *start;
@@ -20,7 +14,7 @@ typedef struct {
   ulong used;
 } AllocHeader;
 
-void moveMemory(const void *dest, const void *from, const void *to) {
+void moveMemory(void *dest, void *from, void *to) {
   while (from < to) {
     *((byte*)dest++) = *((byte*)from++);
   }
@@ -106,7 +100,11 @@ void shareAlloc(void *allocation) {
 void *reallocFromHeap(Heap *heap, void *allocation, ulong size) {
   void *reallocation = allocFromHeap(heap, size);
 
-  if (reallocation != NULL && allocation != NULL) {
+  if (reallocation == NULL) {
+    return NULL;
+  }
+
+  if (allocation != NULL) {
     AllocHeader *header = allocation - sizeof(AllocHeader);
     ulong allocationSize = header->end - allocation + sizeof(AllocHeader);
     moveMemory(reallocation, allocation, allocation + (size < allocationSize ? size : allocationSize));
