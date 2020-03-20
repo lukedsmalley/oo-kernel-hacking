@@ -8,29 +8,6 @@
 #include "heap.c"
 #include "list-macros.c"
 
-boolean macroVarLocked = false;
-void *macroVar = 0;
-
-#define requestMacroVar(type) \
-  while (macroVarLocked); \
-  macroVarLocked = true; \
-  macroVar = allocFromDefaultHeap(sizeof(type))
-
-#define releaseMacroVar() \
-  deallocFromDefaultHeap(macroVar); \
-  macroVarLocked = false
-
-typedef struct {
-  StreamItem count;
-} ReadListOfMacroVar;
-
-#define readListOf(list, reader, stream, countSize) \
-  requestMacroVar(ReadListOfMacroVar); \
-  macroVar->count = readAndCombineStreamItems(stream, countSize); \
-  for (ulong i = 0; i < macroVar; i++) { \
-    addToList(reader() \
-  }
-
 typedef struct {
   ulong id;
   List(byte) name;
@@ -39,17 +16,18 @@ typedef struct {
 
 typedef struct {
   ulong id;
-  LIST_PARAM(byte, name);
+  List(byte) name;
   ulong type;
-  LIST_PARAM(Field, parameters);
-  LIST_PARAM(byte, instructions);
+  List(Field) parameters;
+  List(byte) instructions;
 } Function;
 
 typedef struct {
   ulong id;
-  LIST_PARAM(Field, fields);
-  LIST_PARAM(Function, methods);
-  LIST_PARAM(ulong, superclasses);
+  List(byte) name;
+  List(Field) fields;
+  List(Function) methods;
+  List(ulong) superclasses;
 } Class;
 
 typedef struct {
@@ -85,32 +63,43 @@ void loadFunctions(Program *program, Stream in) {
   }
 }
 
-boolean readByteToList(List(byte) *list, ulong id, Stream stream) {
+boolean readByteIntoList(List(byte) *list, ulong id, Stream stream) {
   byte value;
   if (!readStream(&value, stream)) return false;
-  addValueToList(list, value);
-  return true;
+  return addValueToList(list, value);
 }
 
 boolean readField(List(Field) *list, ulong id, Stream stream) {
   Field field = { id };
-  List(byte) name = emptyList();
-  if (!readListFromStream())
-  addValueToList()
+
+  field.name = emptyListOf(byte);
+  if (!readListFromStream(&name, readByteIntoList, stream, readStream))
+    return false;
+
+  if (!readStreamQWord(field.type, stream))
+    return false;
+
+  return addValueToList(list, field);
 }
 
-boolean readClass(List(Class) *classes, ulong index, Stream stream) {
-  Class class;
-  addValueToList(classes, class);
+boolean readClass(List(Class) *classes, ulong id, Stream stream) {
+  Class class = { id };
+
+  if (!)
+
+  return addValueToList(classes, class);
 }
 
 boolean readFunction(List(Function) *functions, ulong index, Stream stream) {
-
+  
 }
 
 boolean readProgram(Program *program, Stream stream) {
-  if (!readListFromStream(&program->classes, readClass, stream, readStreamQWord)) return false;
-  if (!readListFromStream(&program->functions, readFunction, stream, readStreamQWord)) return false;
+  if (!readListFromStream(&program->classes, readClass, stream, readStreamQWord))
+    return false;
+
+  if (!readListFromStream(&program->functions, readFunction, stream, readStreamQWord))
+    return false;
 
   return true;
 }

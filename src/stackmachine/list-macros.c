@@ -4,18 +4,6 @@
 #include "types.c"
 #include "default-heap.c"
 
-#define ARRAY_PARAM(type, name, size) \
-  type name[size]; \
-  ulong name##_itemCount;
-
-#define ARRAY_VAR(type, name, count) \
-  type name[size]; \
-  ulong name##itemCount = count;
-
-#define ARRAY_VAR_OF(type, name, values) \
-  type name[] = values; \
-  ulong name##_itemCount = sizeof(name) / sizeof(type)
-
 #define List(type) \
   struct { \
     type *items; \
@@ -34,24 +22,13 @@
     .count = 0 \
   }
 
-#define LIST_PARAM(type, name) \
-  type *name; \
-  ulong name##_itemCount
-//ulong name##_itemSize; \
-
-#define INIT_LIST_PARAM(name) \
-  .##name = NULL, \
-  .##name##_itemCount = 0
-
-#define LIST_VAR(type, name) \
-  type *name = NULL; \
-  ulong name##_itemSize = sizeof(type); \
-  ulong name##_itemCount = 0
+#define addValueToList(listRef, value) \
+  addToListFromMemory(listRef, sizeof(*listRef->items), &value, sizeof(value));
 
 #define destroyList(name) \
-  deallocFromDefaultHeap(name);
+  deallocFromDefaultHeap(name.items);
 
-boolean addMemoryToList(List(void) *list, ulong itemSize, void *value, ulong valueSize) {
+boolean addToListFromMemory(List(void) *list, ulong itemSize, void *value, ulong valueSize) {
   ulong size = itemSize * list->count;
   void *reallocation = reallocFromDefaultHeap(list->items, size + itemSize);
   if (reallocation == NULL) {
@@ -63,8 +40,5 @@ boolean addMemoryToList(List(void) *list, ulong itemSize, void *value, ulong val
   ++list->count;
   return true;
 }
-
-#define addValueToList(listPointer, value) \
-  addMemoryToList(listPointer, sizeof(*listPointer->items), &value, sizeof(value));
 
 #endif
