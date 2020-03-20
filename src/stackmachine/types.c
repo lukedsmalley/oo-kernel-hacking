@@ -25,4 +25,16 @@ typedef unsigned char byte;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
+typedef struct {
+  ulong offset;
+  ulong size;
+} Function_;
+
+typedef struct {
+  byte *data;
+  ulong length;
+  Function_ *functions;
+  ulong functionCount;
+} Program_;
+
 #endif

@@ -6,16 +6,21 @@
 #include "types.c"
 #include "stream.c"
 
-boolean readItemFromFile(ulong *value, FILE *handle) {
-  byte readValue;
-  ulong count = fread(&readValue, 1, 1, handle);
-  *value = readValue;
-  return count >= 0;
+StreamItem readItemFromFile(FILE *handle) {
+  byte value = 0;
+  ulong count = fread(&value, 1, 1, handle);
+  return count < 1 ? (StreamItem) {
+    .done = true,
+    .value = 0
+  } : (StreamItem) {
+    .done = false,
+    .value = value
+  };
 }
 
 Stream openFileStream(const char *filename) {
   return (Stream) {
-    .valueSize = sizeof(byte),
+    .itemSize = sizeof(byte),
     .handle = fopen(filename, "rb"),
     .next = readItemFromFile
   };

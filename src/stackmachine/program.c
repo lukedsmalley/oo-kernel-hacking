@@ -4,35 +4,17 @@
 #include <stdlib.h>
 
 #include "types.c"
+#include "list.c"
 #include "stream.c"
 #include "heap.c"
-#include "list-macros.c"
 
 typedef struct {
-  ulong id;
-  List(byte) name;
-  ulong type;
-} Field;
-
-typedef struct {
-  ulong id;
-  List(byte) name;
-  ulong type;
-  List(Field) parameters;
-  List(byte) instructions;
+  byte *body;
+  ulong size;
 } Function;
 
 typedef struct {
-  ulong id;
-  List(byte) name;
-  List(Field) fields;
-  List(Function) methods;
-  List(ulong) superclasses;
-} Class;
-
-typedef struct {
-  List(Class) classes;
-  List(Function) functions;
+  List functions;
 } Program;
 
 void loadFunctions(Program *program, Stream in) {
@@ -63,49 +45,17 @@ void loadFunctions(Program *program, Stream in) {
   }
 }
 
-boolean readByteIntoList(List(byte) *list, ulong id, Stream stream) {
-  byte value;
-  if (!readStream(&value, stream)) return false;
-  return addValueToList(list, value);
-}
+Program loadProgram(Stream in) {
+  Program program = {
+    .functions = createListOnDefaultHeap(sizeof(Function))
+  };
 
-boolean readField(List(Field) *list, ulong id, Stream stream) {
-  Field field = { id };
+  loadFunctions(&program, in);
 
-  field.name = emptyListOf(byte);
-  if (!readListFromStream(&name, readByteIntoList, stream, readStream))
-    return false;
-
-  if (!readStreamQWord(field.type, stream))
-    return false;
-
-  return addValueToList(list, field);
-}
-
-boolean readClass(List(Class) *classes, ulong id, Stream stream) {
-  Class class = { id };
-
-  if (!)
-
-  return addValueToList(classes, class);
-}
-
-boolean readFunction(List(Function) *functions, ulong index, Stream stream) {
-  
-}
-
-boolean readProgram(Program *program, Stream stream) {
-  if (!readListFromStream(&program->classes, readClass, stream, readStreamQWord))
-    return false;
-
-  if (!readListFromStream(&program->functions, readFunction, stream, readStreamQWord))
-    return false;
-
-  return true;
+  return program;
 }
 
 void destroyProgram(Program program) {
-  destroyList(program.classes);
   destroyList(program.functions);
 }
 
