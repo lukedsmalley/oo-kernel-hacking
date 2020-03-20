@@ -3,60 +3,47 @@
 
 #include "types.c"
 #include "list.c"
+#include "list-macros.c"
 
 typedef struct {
-  boolean done;
-  ulong value;
-} StreamItem;
-
-typedef struct {
-  byte itemSize;
+  byte valueSize;
   void *handle;
-  StreamItem (*next)(void *handle);
+  boolean (*next)(long *value, void *handle);
 } Stream;
 
-StreamItem readStreamItem(Stream stream) {
-  return stream.next(stream.handle);
+typedef boolean (*StreamReader)(ulong *value, Stream stream);
+typedef boolean (*ListItemStreamReader)(List(void) *list, ulong index, Stream stream);
+
+boolean readStream(ulong *value, Stream stream) {
+  return stream.next(value, stream.handle);
 }
 
-StreamItem readAndCombineStreamItems(Stream stream, byte count) {
-  ulong value = 0;
+boolean readAndCombineStreamItems(ulong *value, Stream stream, byte count) {
   for (byte i = 0; i < count; i++) {
-    StreamItem item = stream.next(stream.handle);
-    if (item.done) {
-      return item;
-    }
-    value += item.value << (i * 8 * stream.itemSize);
+    if (!stream.next(value, stream.handle)) return false;
+    if (i < count - 1) *value <<= 8 * stream.valueSize;
   }
-  return (StreamItem) {
-    .done = false,
-    .value = value
-  };
 }
 
-StreamItem readStreamWord(Stream stream) {
-  return readAndCombineStreamItems(stream, 2);
+boolean readStreamWord(ulong *value, Stream stream) {
+  return readAndCombineStreamItems(value, stream, 2);
 }
 
-StreamItem readStreamDWord(Stream stream) {
-  return readAndCombineStreamItems(stream, 4);
+boolean readStreamDWord(ulong *value, Stream stream) {
+  return readAndCombineStreamItems(value, stream, 4);
 }
 
-StreamItem readStreamQWord(Stream stream) {
-  return readAndCombineStreamItems(stream, 8);
+boolean readStreamQWord(ulong *value, Stream stream) {
+  return readAndCombineStreamItems(value, stream, 8);
 }
 
-List readStreamItems(Stream stream, ulong count) {
-  List values = createListOnDefaultHeap(stream.itemSize);
+boolean readListFromStream(List(void) *list, ListItemStreamReader itemReader, Stream stream, StreamReader countReader) {
+  ulong count;
+  if (!countReader(&count, stream)) return false;
   for (ulong i = 0; i < count; i++) {
-    StreamItem item = stream.next(stream.handle);
-    if (item.done) {
-      destroyList(values);
-      return createListOnDefaultHeap(stream.itemSize);
-    }
-    addToList(&values, &item.value, stream.itemSize);
+    if (!itemReader(list, i, stream)) return false;
   }
-  return values;
+  return true;
 }
 
 #endif
