@@ -4,10 +4,16 @@
 #include "list.c"
 #include "program.c"
 
+typedef union {
+  long longValue;
+  double doubleValue;
+  void* pointerValue;
+} Untyped;
+
 typedef struct {
-  void *item;
+  Untyped value;
   ulong type;
-} Box;
+} Typed;
 
 typedef struct {
   Function *function;
@@ -21,8 +27,8 @@ FunctionCall createFunctionCall(Function *function, List arguments) {
   return (FunctionCall) {
     function,
     arguments,
-    .stack = createListOnDefaultHeap(sizeof(Box)),
-    .locals = createListOnDefaultHeap(sizeof(void*)),
+    .stack = createListOnDefaultHeap(sizeof(Untyped)),
+    .locals = createListOnDefaultHeap(sizeof(Typed)),
     .instPointer = 0
   };
 }
