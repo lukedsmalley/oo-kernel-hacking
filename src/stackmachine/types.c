@@ -18,23 +18,76 @@
 #endif
 
 #define endof(var) \
-  ((void*)&var + sizeof(var))
+  ((Void*)&var + sizeof(var))
 
-typedef char boolean;
-typedef unsigned char byte;
-typedef unsigned int uint;
-typedef unsigned long ulong;
+#define typedef_MaybeType(Type) \
+  typedef struct { \
+    Boolean hasValue; \
+    Type value; \
+  } Maybe##Type;
 
-typedef struct {
-  ulong offset;
-  ulong size;
-} Function_;
+#define typedef_TypedStream(Type) \
+  typedef struct { \
+    Any *handle; \
+    Boolean hasValue; \
+    Type value; \
+    Boolean (*reader)(Type##Stream *stream); \
+  } Type##Stream; \
 
-typedef struct {
-  byte *data;
-  ulong length;
-  Function_ *functions;
-  ulong functionCount;
-} Program_;
+#define readStream(streamPtr) \
+  streamPtr->reader(streamPtr)
+
+#define typedef_TypedList(Type) \
+  typedef struct { \
+    Heap *heap; \
+    Type *items; \
+    ULong count; \
+    Boolean (*appender)(Type##List *list, Type value) \
+  } Type##List; \
+  \
+  Boolean addTo##Type##List(Type##List *list, Type value) { \
+    if (!growList(list->heap, &list->items, &list->count, sizeof(Type))) { \
+      return false; \
+    } \
+    list->items[list->count++] = value; \
+    return true; \
+  } \
+  \
+  Type##List create##Type##List(Heap *heap) { \
+    return (Type##List) { \
+      heap, \
+      .items = NULL, \
+      .count = 0, \
+      .appender = addTo##Type##List \
+    }; \
+  }
+
+#define destroyList(list) \
+  deallocFromHeap(list.heap, list.items)
+
+typedef void Void;
+typedef void Any;
+typedef char Char;
+typedef char Boolean;
+typedef unsigned char Byte;
+typedef int Int;
+typedef long Long;
+typedef unsigned long ULong;
+
+#include "heap.c"
+
+Boolean growList(Heap *heap, Any **items, ULong *count, ULong itemSize) {
+  Any *realloc = reallocFromHeap(heap, *items, *count * itemSize + itemSize);
+  if (realloc == NULL) {
+    return false;
+  }
+  *items = realloc;
+  return true;
+}
+
+typedef_TypedStream(Byte);
+
+typedef_TypedList(Byte);
+typedef_TypedList(ULong);
 
 #endif

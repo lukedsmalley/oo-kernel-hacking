@@ -4,15 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.c"
 #include "program.c"
-#include "list.c"
 #include "function-call.c"
 #include "instructions/add.c"
 #include "instructions/misc.c"
 
 typedef struct {
-  byte size;
-  void (*handler)(List *callStack);
+  Byte size;
+  Void (*handler)(FunctionList *callStack);
 } Instruction;
 
 Instruction instructions[] = {
@@ -22,8 +22,8 @@ Instruction instructions[] = {
   /* 3: add_double */ { 0, handleAddDoubleInst },
 };
 
-void runProgram(Program program) {
-  List callStack = createListOnDefaultHeap(sizeof(FunctionCall));
+Void runProgram(Program program) {
+  FunctionList callStack = createListOnDefaultHeap(sizeof(FunctionCall));
 
   /* TODO: Pass remaining argv */
   FunctionCall entryCall = createFunctionCall(

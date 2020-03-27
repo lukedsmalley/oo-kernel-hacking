@@ -4,29 +4,22 @@
 #include <stdio.h>
 
 #include "types.c"
-#include "stream.c"
 
-StreamItem readItemFromFile(FILE *handle) {
-  byte value = 0;
-  ulong count = fread(&value, 1, 1, handle);
-  return count < 1 ? (StreamItem) {
-    .done = true,
-    .value = 0
-  } : (StreamItem) {
-    .done = false,
-    .value = value
-  };
+Boolean readFileStreamByte(ByteStream *stream) {
+  stream->hasValue = fread(&stream->value, 1, 1, stream->handle) > 0;
+  return stream->hasValue;
 }
 
-Stream openFileStream(const char *filename) {
-  return (Stream) {
-    .itemSize = sizeof(byte),
+ByteStream openFileStream(Char *filename) {
+  return (ByteStream) {
     .handle = fopen(filename, "rb"),
-    .next = readItemFromFile
+    .hasValue = false,
+    .value = 0,
+    .reader = readFileStreamByte
   };
 }
 
-void closeFileStream(Stream stream) {
+Void closeFileStream(ByteStream stream) {
   fclose(stream.handle);
 }
 
