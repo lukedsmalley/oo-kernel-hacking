@@ -1,6 +1,9 @@
 <div align="center">
   <h1>Object-oriented Kernel Hacking</h1>
-  <p>Linux kernel workspace for term research in GSU's CSC 4320 (Operating Systems) course. Yet another attempt at marrying an intermediate runtime that has first-class support for object orientation with the operating system for great good.</p>
+  <p>Formally referred to as the research implementation of:</p>
+  <h3>Object-oriented virtual execution as a foundation for operating system design</h3>
+  <p>This is a Linux kernel workspace for term research in GSU's CSC 4320 (Operating Systems) course. Yet another attempt at marrying an intermediate runtime that has first-class support for object orientation with the operating system for great good.</p>
+  <p>This README was created at the beginning of the semester for directing the project. Specific instructions for using the project software are in <a href="MANUAL.md">the manual</a>.
 </div>
 
 ## Vision
@@ -31,6 +34,8 @@ The optimistic things:
 We may need to create a quick and dirty translator to turn .NET intermediate language into our bytecode. This could be more fun than handwriting bytecode programs.
 
 ## Workspace Details
+[The manual](MANUAL.md) contains proper explaination of project usage overall and also usage for each subproject.
+
 This repository contains the Linux kernel 5.5.2 and Busybox 1.31 source trees that are used to build a minimal bootable Linux system as described by the practical references below.
 
 After cloning this repository, run `setup.sh` to do `make suchandsuchconfig` and whatever else happens under the covers, creating the `build` and `tree-snapshots` directories. `tree-snapshots` contains listings of the subdirectories of `build`, which can be compared with `treetool` if you want to see what configuration and building actually do.
