@@ -25,14 +25,14 @@ pushd_silently "$WORKSPACE_PATH"
 
     pushd_silently linux
       make "$@"
-      #../../treetool snapshot . ../../tree-snapshots/linux-built.tree
+      ../../treetool snapshot . ../../tree-snapshots/linux-built.tree
     popd_silently linux
 
     pushd_silently busybox
       make "$@"
-      #../../treetool snapshot . ../../tree-snapshots/busybox-built.tree
+      ../../treetool snapshot . ../../tree-snapshots/busybox-built.tree
       make install
-      #../../treetool snapshot . ../../tree-snapshots/busybox-installed.tree
+      ../../treetool snapshot . ../../tree-snapshots/busybox-installed.tree
     popd_silently busybox
 
     mkdir -p initramfs/root

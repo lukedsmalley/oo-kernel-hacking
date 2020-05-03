@@ -28,23 +28,22 @@ pushd_silently "$WORKSPACE_PATH"
     exit 1
   fi
 
-  mkdir -p build/linux build/busybox
-  #mkdir -p tree-snapshots build/linux build/busybox
-  #./treetool snapshot build/linux tree-snapshots/linux-unconfigured.tree
-  #./treetool snapshot build/busybox tree-snapshots/busybox-unconfigured.tree
+  mkdir -p tree-snapshots build/linux build/busybox
+  ./treetool snapshot build/linux tree-snapshots/linux-unconfigured.tree
+  ./treetool snapshot build/busybox tree-snapshots/busybox-unconfigured.tree
 
   pushd_silently src
 
     pushd_silently linux
       make O=../../build/linux allnoconfig
       cp .config-projectdefault ../../build/linux/.config
-      #../../treetool snapshot ../../build/linux ../../tree-snapshots/linux-configured.tree
+      ../../treetool snapshot ../../build/linux ../../tree-snapshots/linux-configured.tree
     popd_silently linux
 
     pushd_silently busybox &> /dev/null
       make O=../../build/busybox defconfig
       cp .config-projectdefault ../../build/busybox/.config
-      #../../treetool snapshot ../../build/busybox ../../tree-snapshots/busybox-configured.tree
+      ../../treetool snapshot ../../build/busybox ../../tree-snapshots/busybox-configured.tree
     popd_silently busybox
 
   popd_silently src
