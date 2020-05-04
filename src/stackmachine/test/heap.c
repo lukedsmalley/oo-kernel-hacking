@@ -7,9 +7,9 @@
 #define FUN_LONG_BYTES 0x10, 0x32, 0x54, 0x76, 0x98, 0xba, 0xdc, 0xfe
 
 test int endof_returnsEndPointer() {
-  byte value = 0;
+  Byte value = 0;
 
-  if ((byte*)endof(value) - &value != sizeof(value))
+  if ((Byte*)endof(value) - &value != sizeof(value))
     return !!printf("endof() does not return a pointer to the location after the " \
       "given memory location.\n");
 
@@ -31,7 +31,7 @@ test int moveMemory_copiesData() {
 }
 
 test int createHeap_returnsHeap() {
-  byte memory[sizeof(AllocHeader)];
+  Byte memory[sizeof(AllocHeader)];
   Heap heap = createHeap(memory, sizeof(memory));
   AllocHeader *header = heap.start;
 
@@ -49,7 +49,7 @@ test int allocFromHeap_doesNothingForZeroSize() {
 }
 
 test int allocFromHeap_addsToHeapWithExactSpace() {
-  byte memory[sizeof(AllocHeader) + sizeof(long)];
+  Byte memory[sizeof(AllocHeader) + sizeof(long)];
   Heap heap = createHeap(memory, sizeof(memory));
 
   void* allocation = allocFromHeap(&heap, sizeof(long));
@@ -72,7 +72,7 @@ test int allocFromHeap_addsToHeapWithExactSpace() {
 }
 
 test int allocFromHeap_addsToHeapConsecutively() {
-  byte memory[2 * (sizeof(AllocHeader) + sizeof(long))];
+  Byte memory[2 * (sizeof(AllocHeader) + sizeof(long))];
   Heap heap = createHeap(memory, sizeof(memory));
 
   for (int i = 0; i < 2; i++) {
@@ -97,7 +97,7 @@ test int allocFromHeap_addsToHeapConsecutively() {
 }
 
 test int allocFromHeap_addsToHeapAfterPopDeallocation() {
-  byte memory[2 * (sizeof(AllocHeader) + sizeof(long))];
+  Byte memory[2 * (sizeof(AllocHeader) + sizeof(long))];
   Heap heap = createHeap(memory, sizeof(memory));
 
   void *allocations[2];
@@ -128,7 +128,7 @@ test int allocFromHeap_addsToHeapAfterPopDeallocation() {
 }
 
 test int deallocFromHeap_doesNothingForNullPointer() {
-  byte memory[sizeof(AllocHeader) + sizeof(long)];
+  Byte memory[sizeof(AllocHeader) + sizeof(long)];
   Heap heap = createHeap(memory, sizeof(memory));
 
   //This is a relatively weak test
@@ -138,7 +138,7 @@ test int deallocFromHeap_doesNothingForNullPointer() {
 }
 
 test int deallocFromHeap_mergesUnusedSpace() {
-  byte memory[2 * (sizeof(AllocHeader) + sizeof(long))];
+  Byte memory[2 * (sizeof(AllocHeader) + sizeof(long))];
   Heap heap = createHeap(memory, sizeof(memory));
 
   void *allocations[2];
@@ -163,7 +163,7 @@ test int deallocFromHeap_mergesUnusedSpace() {
 }
 
 test int deallocFromHeap_doesNothingForPointersStillInUse() {
-  byte memory[2 * (sizeof(AllocHeader) + sizeof(long))];
+  Byte memory[2 * (sizeof(AllocHeader) + sizeof(long))];
   Heap heap = createHeap(memory, sizeof(memory));
 
   void *allocation = allocFromHeap(&heap, sizeof(long));
@@ -183,7 +183,7 @@ test int deallocFromHeap_doesNothingForPointersStillInUse() {
 }
 
 test int shareAlloc_incrementsReferenceCount() {
-  byte memory[sizeof(AllocHeader) + sizeof(long)];
+  Byte memory[sizeof(AllocHeader) + sizeof(long)];
   Heap heap = createHeap(memory, sizeof(memory));
 
   void *allocation = allocFromHeap(&heap, sizeof(long));
@@ -206,7 +206,7 @@ test int reallocFromHeap_returnsNullOnAllocationFailure() {
 }
 
 test int reallocFromHeap_copiesToLocationWithMoreSpace() {
-  byte memory[2 * sizeof(AllocHeader) + sizeof(int) + sizeof(long)];
+  Byte memory[2 * sizeof(AllocHeader) + sizeof(int) + sizeof(long)];
   Heap heap = createHeap(memory, sizeof(memory));
 
   int *allocation = allocFromHeap(&heap, sizeof(int));
@@ -231,7 +231,7 @@ test int reallocFromHeap_copiesToLocationWithMoreSpace() {
 }
 
 test int reallocFromHeap_copiesToLocationWithLessSpace() {
-  byte memory[2 * sizeof(AllocHeader) + sizeof(int) + sizeof(short)];
+  Byte memory[2 * sizeof(AllocHeader) + sizeof(int) + sizeof(short)];
   Heap heap = createHeap(memory, sizeof(memory));
 
   int *allocation = allocFromHeap(&heap, sizeof(int));

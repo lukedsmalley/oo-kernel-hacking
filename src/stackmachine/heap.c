@@ -4,38 +4,38 @@
 #include "types.c"
 
 typedef struct {
-  void *start;
-  void *free;
-  void *end;
+  Any *start;
+  Any *free;
+  Any *end;
 } Heap;
 
 typedef struct {
-  void *end;
-  ulong used;
+  Any *end;
+  ULong used;
 } AllocHeader;
 
-void moveMemory(void *dest, void *from, void *to) {
+Void moveMemory(Any *dest, Any *from, Any *to) {
   while (from < to) {
-    *((byte*)dest++) = *((byte*)from++);
+    *((Byte*)dest++) = *((Byte*)from++);
   }
 }
 
-Heap createHeap(void *buffer, ulong size) {
+Heap createHeap(Any *buffer, ULong size) {
   AllocHeader *header = buffer;
   header->end = buffer + size;
   header->used = 0;
   return (Heap) { buffer, buffer, header->end };
 }
 
-void *allocFromHeap(Heap *heap, ulong size) {
+Any *allocFromHeap(Heap *heap, ULong size) {
   if (size == 0 || heap->free + size + sizeof(AllocHeader) > heap->end) {
     return NULL;
   }
 
-  void *allocation = heap->start;
+  Any *allocation = heap->start;
   do {
     AllocHeader *header = allocation;
-    ulong allocationSize = header->end - allocation;
+    ULong allocationSize = header->end - allocation;
 
     if (!header->used) {
       //Combine consecutive free cells
@@ -69,7 +69,7 @@ void *allocFromHeap(Heap *heap, ulong size) {
   return NULL;
 }
 
-void deallocFromHeap(Heap *heap, void *allocation) {
+Void deallocFromHeap(Heap *heap, Any *allocation) {
   if (allocation == NULL) {
     return;
   }
@@ -81,7 +81,7 @@ void deallocFromHeap(Heap *heap, void *allocation) {
 
     //Combine consecutive free cells
     if (!header->used) {
-      void *end = header->end;
+      Any *end = header->end;
       while (!((AllocHeader*)end)->used) {
         end = ((AllocHeader*)end)->end;
       }
@@ -90,15 +90,15 @@ void deallocFromHeap(Heap *heap, void *allocation) {
   }
 }
 
-void shareAlloc(void *allocation) {
+Void shareAlloc(Any *allocation) {
   if (allocation == NULL) {
     return;
   }  
   ++((AllocHeader*)(allocation - sizeof(AllocHeader)))->used;
 }
 
-void *reallocFromHeap(Heap *heap, void *allocation, ulong size) {
-  void *reallocation = allocFromHeap(heap, size);
+Any *reallocFromHeap(Heap *heap, Any *allocation, ULong size) {
+  Any *reallocation = allocFromHeap(heap, size);
 
   if (reallocation == NULL) {
     return NULL;
@@ -106,7 +106,7 @@ void *reallocFromHeap(Heap *heap, void *allocation, ulong size) {
 
   if (allocation != NULL) {
     AllocHeader *header = allocation - sizeof(AllocHeader);
-    ulong allocationSize = header->end - allocation + sizeof(AllocHeader);
+    ULong allocationSize = header->end - allocation + sizeof(AllocHeader);
     moveMemory(reallocation, allocation, allocation + (size < allocationSize ? size : allocationSize));
   }
 

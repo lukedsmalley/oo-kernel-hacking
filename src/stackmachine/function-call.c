@@ -12,18 +12,20 @@ typedef union {
 
 typedef struct {
   Untyped value;
-  ulong type;
+  ULong type;
 } Typed;
+
+typedef_TypedList(Typed);
 
 typedef struct {
   Function *function;
-  List arguments;
-  List stack;
-  List locals;
-  ulong instPointer;
+  TypedList arguments;
+  TypedList stack;
+  TypedList locals;
+  ULong instPointer;
 } FunctionCall;
 
-FunctionCall createFunctionCall(Function *function, List arguments) {
+FunctionCall createFunctionCall(Function *function, TypedList arguments) {
   return (FunctionCall) {
     function,
     arguments,

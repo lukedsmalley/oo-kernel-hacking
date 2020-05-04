@@ -23,18 +23,18 @@ Instruction instructions[] = {
 };
 
 Void runProgram(Program program) {
-  FunctionList callStack = createListOnDefaultHeap(sizeof(FunctionCall));
+  FunctionList callStack = createFunctionList(&defaultHeap);
 
   /* TODO: Pass remaining argv */
   FunctionCall entryCall = createFunctionCall(
     program.functions.items,
-    createListOnDefaultHeap(sizeof(void*)));
+    createTypedList(&defaultHeap));
   addToList(&callStack, &entryCall, sizeof(entryCall));
 
-  while (callStack.itemCount > 0) {
-    FunctionCall *call = (FunctionCall*)callStack.items + callStack.itemCount - 1;
-    byte *op = call->function->body + call->instPointer;
-    if (op >= call->function->body + call->function->size) {
+  while (callStack.count > 0) {
+    FunctionCall *call = (FunctionCall*)callStack.items + callStack.count - 1;
+    Byte *op = call->function->instructions.items + call->instPointer;
+    if (op >= call->function->instructions.items + call->function->instructions.count) {
       printf("Reached the end of a function without returning.\n");
       exit(1);
     } else if (*op >= sizeof(instructions) / sizeof(Instruction)) {

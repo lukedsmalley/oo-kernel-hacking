@@ -5,7 +5,7 @@
 
 #include "../list.c"
 
-void handleNoOpInst(List *callStack) {
+void handleNoOpInst(TypedList *callStack) {
   printf("nop\n");
 }
 

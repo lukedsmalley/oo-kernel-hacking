@@ -3,7 +3,8 @@
 
 #include <stdlib.h>
 
-#include "types.c"
+#include "list.c"
+#include "stream.c"
 #include "default-heap.c"
 
 typedef struct {
