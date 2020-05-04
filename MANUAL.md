@@ -68,6 +68,8 @@ To build and run the bootable system in the QEMU emulator, run the main build sc
 
 After the first build, `setup.sh` does not need to be run again, unless you want to do a complete rebuild. To do a clean rebuild, run `clean.sh` and then repeat the process above.
 
+Built files are created in the `build` folder.
+
 To run the build process with `treetool` diff output (requires Node.js and Yarn), use `*-and-diff.sh` versions of `setup.sh` and `build.sh`.
 
 <div align="center">
@@ -101,6 +103,19 @@ Running `treetool` without arguments will also display this usage information.
 <div align="center">
   <h2><code>stackmachine</code> Usage</h2>
 </div>
+
+`stackmachine` is the virtual execution system to be integrated into the kernel. In it's in-development state, it calls stdlib functions for debugging purposes, but uses a stdlib-independent heap.
+
+The `build-and-run.sh` script will compile the source code, generate an example program through `generate-program.sh`, and run the engine as a standalone application. The application binary is written to the `build` folder.
+
+Usage of the compiled program is:
+```
+stackmachine <program-file>
+```
+
+The `./test.sh` script will run the unit tests in the `src/stackmachine/test` folder. It was necessary to write tests to work problems out of the independent heap.
+
+Building and running is not particularly useful at the moment, since a large amount of metaprogramming was in progress to reduce the repetitiveness of the program-loading code.
 
 <div align="center">
   <h2><code>ciltool</code> Usage</h2>
