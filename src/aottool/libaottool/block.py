@@ -38,6 +38,8 @@ class ILBlock(ILElement):
         args = opcode_parts[1:] + line[opcode_index + 1:]
         if opcode in ILBlock.INSTRUCTION_CONSTRUCTORS:
           self.instructions.append(ILBlock.INSTRUCTION_CONSTRUCTORS[opcode](label, args))
+        else:
+          print('NYI op %s will be emitted as no-op' % (opcode))
       start += 1
     if start >= len(lines):
       raise Exception('Unterminated block')

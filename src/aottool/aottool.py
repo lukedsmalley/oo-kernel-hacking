@@ -9,7 +9,7 @@ from libaottool.lexer import lex_il_line
 parser = ArgumentParser(description='Compile C# projects to alternative binary formats')
 parser.add_argument('project_path', nargs='?', default='.', help='Path to a C# project folder')
 parser.add_argument('-o', '--output', help='Path to which output is written')
-parser.add_argument('-f', '--format', choices=['cil', 'c', 'bin'], default='cil', help='Compiler mode')
+parser.add_argument('-f', '--format', choices=['cil', 'c', 'bin'], default='bin', help='Compiler mode')
 
 args = parser.parse_args()
 
@@ -80,4 +80,5 @@ if args.format == 'c':
   exit(0)
 
 bin_path = os.path.join(aot_dir, project_name + '.bin')
-subprocess.call(['gcc', '-Ilibaottool/include', '-o', bin_path, c_path])
+include_path = os.path.join(os.path.dirname(__file__), 'libaottool/include')
+subprocess.call(['gcc', '-I' + include_path, '-o', bin_path, c_path])
