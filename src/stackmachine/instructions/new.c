@@ -3,7 +3,7 @@
 
 #include "../list.c"
 
-void handleNewObjectInst(List *callStack) {
+void handleNewObjectInst(TypedList *callStack) {
   
 }
 

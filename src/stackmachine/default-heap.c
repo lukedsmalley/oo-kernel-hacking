@@ -1,19 +1,18 @@
 #ifndef __DEFAULT_HEAP__
 #define __DEFAULT_HEAP__
 
-#include "types.c"
 #include "heap.c"
 
 #define DEFAULT_HEAP_SIZE 4096
 
-byte defaultHeapBuffer[DEFAULT_HEAP_SIZE];
+Byte defaultHeapBuffer[DEFAULT_HEAP_SIZE];
 Heap defaultHeap;
 
 void createDefaultHeap() {
   defaultHeap = createHeap(defaultHeapBuffer, DEFAULT_HEAP_SIZE);
 }
 
-void *allocFromDefaultHeap(ulong size) {
+void *allocFromDefaultHeap(ULong size) {
   return allocFromHeap(&defaultHeap, size);
 }
 
@@ -21,7 +20,7 @@ void deallocFromDefaultHeap(void *allocation) {
   deallocFromHeap(&defaultHeap, allocation);
 }
 
-void *reallocFromDefaultHeap(void *allocation, ulong size) {
+void *reallocFromDefaultHeap(void *allocation, ULong size) {
   return reallocFromHeap(&defaultHeap, allocation, size);
 }
 

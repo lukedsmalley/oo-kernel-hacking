@@ -6,9 +6,9 @@
 #include "../list.c"
 #include "../function-call.c"
 
-void handleAddLongInst(List *callStack) {
+void handleAddLongInst(TypedList *callStack) {
   printf("add_long\n");
-  FunctionCall *call = (FunctionCall*)callStack->items + callStack->itemCount - 1;
+  FunctionCall *call = (FunctionCall*)callStack->items + callStack->count - 1;
   /* If popFromList returns NULL, then mistakes were made long before we got here */
   Untyped *a = popFromList(&call->stack);
   Untyped *b = popFromList(&call->stack);
@@ -18,9 +18,9 @@ void handleAddLongInst(List *callStack) {
   addToList(&call->stack, &sum, sizeof(sum));
 }
 
-void handleAddDoubleInst(List *callStack) {
+void handleAddDoubleInst(TypedList *callStack) {
   printf("add_double\n");
-  FunctionCall *call = (FunctionCall*)callStack->items + callStack->itemCount - 1;
+  FunctionCall *call = (FunctionCall*)callStack->items + callStack->count - 1;
   Untyped *a = popFromList(&call->stack);
   Untyped *b = popFromList(&call->stack);
   Untyped sum = { .doubleValue = a->doubleValue + b->doubleValue };
@@ -29,9 +29,9 @@ void handleAddDoubleInst(List *callStack) {
   addToList(&call->stack, &sum, sizeof(sum));
 }
 
-void handleAddLongCheckedInst(List *callStack) {
+void handleAddLongCheckedInst(TypedList *callStack) {
   printf("add_long_checked\n");
-  FunctionCall *call = (FunctionCall*)callStack->items + callStack->itemCount - 1;
+  FunctionCall *call = (FunctionCall*)callStack->items + callStack->count - 1;
   Untyped *a = popFromList(&call->stack);
   Untyped *b = popFromList(&call->stack);
   Untyped sum = { .doubleValue = a->doubleValue + b->doubleValue };

@@ -15,8 +15,9 @@ Int main(Int argCount, const Char **args) {
 
   createDefaultHeap();
 
-  Stream in = openFileStream(args[1]);
-  Program program = loadProgram(in);
+  ByteStream in = openFileStream(args[1]);
+  Program program;
+  readProgramFromByteStream(&program, &in);
   closeFileStream(in);
 
   runProgram(program);
